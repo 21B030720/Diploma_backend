@@ -38,18 +38,29 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
 
+EXTERNAL_APPS = [
+    'drf_yasg',
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'phonenumber_field',
+    'debug_toolbar',
 ]
+
+CUSTOM_APPS = [
+    'apps.users.apps.UsersConfig'
+]
+
+INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -58,6 +69,7 @@ CORS_ALLOWED_ORIGINS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,6 +77,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -168,6 +186,16 @@ REST_FRAMEWORK = {
 }
 
 CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+
+AUTH_USER_MODEL = 'users.User'
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {'type': 'apiKey', 'name': 'Authorization', 'in': 'header'},
+    },
+    'DEEP_LINKING': True,
+}
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
