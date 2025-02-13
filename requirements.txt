@@ -23,6 +23,7 @@ inflection==0.5.1
 kombu==5.4.2
 packaging==24.2
 phonenumbers==8.13.54
+pillow==11.1.0
 prompt_toolkit==3.0.50
 psycopg==3.2.1
 psycopg-binary==3.2.1
