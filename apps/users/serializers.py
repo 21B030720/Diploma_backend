@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from apps.shops.models import Shop
 from apps.users.models import CRMUser, User
 
 
@@ -21,6 +22,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class CRMUserSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
+    shop_name = serializers.SerializerMethodField()
 
     class Meta:
         model = CRMUser
@@ -30,21 +32,31 @@ class CRMUserSerializer(serializers.ModelSerializer):
             'name',
             'phone_number',
             'role',
+            'shop',
+            'shop_name'
         )
 
     def get_username(self, obj):
         return obj.user.username
 
+    def get_shop_name(self, obj):
+        try:
+            return obj.user.shop.name
+        except AttributeError:
+            return None
+
 
 class CRMUserCreateSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=25)
     password = serializers.CharField(max_length=25, required=False, allow_null=True, allow_blank=True)
+    shop_id = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.values_list('id', flat=True))
 
     class Meta:
         model = CRMUser
         fields = (
             'username',
             'password',
+            'shop_id',
             'name',
             'phone_number',
             'role',

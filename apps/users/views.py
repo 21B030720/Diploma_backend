@@ -61,7 +61,6 @@ class CRMUserViewSet(BaseViewSet,
     def perform_destroy(self, instance):
         pk = self.kwargs['pk']
         crm_user = CRMUser.objects.filter(pk=pk).first()
-        crm_user.shops.clear()
         CRMUser.objects.filter(pk=pk).update(deleted=True, role=None)
         User.objects.filter(pk=crm_user.user.pk).update(deleted=True)
 

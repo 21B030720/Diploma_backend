@@ -23,7 +23,7 @@ def create_user(data):
         else:
             raise ValidationError('Пользователь с таким логином уже существует.')
     else:
-        user_data = data.pop('user', None)
+        user_data = data.pop('user')
         user_data['username'] = username
         user = User.objects.create(**user_data)
         user.set_password(password)

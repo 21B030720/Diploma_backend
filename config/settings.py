@@ -57,7 +57,8 @@ EXTERNAL_APPS = [
 ]
 
 CUSTOM_APPS = [
-    'apps.users.apps.UsersConfig'
+    'apps.users.apps.UsersConfig',
+    'apps.shops.apps.ShopsConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS
@@ -146,15 +147,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-# LANGUAGES = [
-#     ('ru', _('Russian')),
-#     ('kz', _('Kazakh')),
-#     ('en-us', _('English')),
-# ]
-#
-# LOCALE_PATHS = [
-#     os.path.join(BASE_DIR, 'apps', 'utils', 'locale')
-# ]
+LANGUAGES = [
+    ('ru', _('Russian')),
+    ('kz', _('Kazakh')),
+    ('en-us', _('English')),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'apps', 'utils', 'locale')
+]
 
 TIME_ZONE = 'UTC'
 
@@ -229,3 +230,13 @@ CELERY_ACKS_LATE = True
 CELERY_TASK_PUBLISH_RETRY = True
 CELERY_DISABLE_RATE_LIMITS = False
 CELERY_TASK_TRACK_STARTED = True
+
+DRF_NESTED_MULTIPART_PARSER = {
+    "separator": "bracket",
+    "raise_duplicate": True,
+    "assign_duplicate": False,
+
+    # output of parser is converted to querydict
+    # if is set to False, dict python is returned
+    "querydict": False,
+}

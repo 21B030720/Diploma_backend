@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 
+from apps import shops
 from apps.utils.enums import RoleType
 from apps.utils.models import DeletedMixin, TimestampMixin
 
@@ -29,3 +30,4 @@ class CRMUser(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=255, blank=True)
     phone_number = PhoneNumberField(blank=True)
     role = models.CharField(choices=RoleType.choices, max_length=255)
+    shop = models.ForeignKey('shops.Shop', on_delete=models.CASCADE, related_name='users', null=True)
