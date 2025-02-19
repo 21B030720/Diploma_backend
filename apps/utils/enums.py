@@ -35,3 +35,9 @@ TimeZones = [
     ('+13', 'GMT+13'),
     ('+14', 'GMT+14'),
 ]
+
+
+class Measures(TextChoices):
+    WEIGHT = 'KG', 'KG'
+    LITER = 'L', 'L'
+    PIECE = 'PC', 'PC'

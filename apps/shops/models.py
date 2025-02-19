@@ -20,6 +20,10 @@ class City(DeletedMixin, TimestampMixin):
     time_zone = models.CharField(max_length=8, choices=TimeZones, default="+5")
 
 
+class ShopCategory(DeletedMixin, TimestampMixin):
+    name = models.CharField(max_length=255)
+
+
 class Shop(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
@@ -33,6 +37,7 @@ class Shop(DeletedMixin, TimestampMixin):
     two_gis_link = models.CharField(max_length=255, null=True)
     contacts = models.TextField(null=True)
     city = models.ForeignKey(to=City, null=True, on_delete=models.CASCADE, related_name='shops')
+    category = models.ForeignKey(to=ShopCategory, null=True, on_delete=models.CASCADE, related_name='shops')
     # schedule = models.OneToOneField(to='shops.ShopSchedule', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
