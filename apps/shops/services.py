@@ -49,3 +49,16 @@ def add_shop(data):
     return shop
 
 
+def update_shop(pk, data):
+    shop = get_object_or_404(Shop, pk=pk)
+    for key, value in data.items():
+        setattr(shop, key, value)
+
+    shop.save()
+    return shop
+
+
+def delete_shop(pk):
+    shop = get_object_or_404(Shop, pk=pk)
+    shop.deleted = True
+    shop.save()

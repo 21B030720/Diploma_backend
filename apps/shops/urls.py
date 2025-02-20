@@ -11,5 +11,6 @@ shop_router.register(prefix='city', viewset=CityViewSet, basename='cities')
 shop_router.register(prefix='', viewset=ShopViewSet, basename='shops')
 
 urlpatterns = [
+    path('products/', include('apps.shops.products.urls')),
     path('', include(shop_router.urls)),
 ]

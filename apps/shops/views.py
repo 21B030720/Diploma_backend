@@ -14,7 +14,7 @@ from apps.shops.models import Shop, City, Country
 from apps.shops.serializers import ShopSerializer, ShopCreateSerializer, ShopSimpleSerializer, CitySerializer, \
     CityCreateSerializer, CitySimpleSerializer, CountrySerializer, CountryCreateSerializer
 from apps.shops.services import add_shop, add_city, update_city, delete_city, add_country, update_country, \
-    delete_country
+    delete_country, delete_shop, update_shop
 from apps.users.models import CRMUser
 from apps.users.permissions import IsAdminOrReadOnly, IsManagerOrReadOnly, ReadOnly
 from apps.utils.enums import RoleType
@@ -86,15 +86,17 @@ class CountryViewSet(BaseViewSet,
                           }
                       ))
     def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = self.perform_update(serializer)
 
         if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
 
         serializer = CountrySerializer(instance=instance)
-
         return Response(serializer.data)
 
     @method_decorator(name='all', decorator=swagger_auto_schema(tags=['countries']))
@@ -170,7 +172,8 @@ class CityViewSet(
                           })
                       )
     def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = self.perform_update(serializer)
 
@@ -188,6 +191,7 @@ class CityViewSet(
         items = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(items, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
 
 @method_decorator(
     name='list',
@@ -207,11 +211,12 @@ class ShopViewSet(BaseViewSet,
                   ):
     queryset = Shop.objects.all()
     serializer_class = ShopSerializer
-    parser_classes = (DrfNestedParser, JSONParser)
+    parser_classes = (DrfNestedParser, )
 
     serializers = {
         'create': ShopCreateSerializer,
-        'update': ShopCreateSerializer
+        'update': ShopCreateSerializer,
+        'all': ShopSimpleSerializer
     }
     permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
 
@@ -221,12 +226,6 @@ class ShopViewSet(BaseViewSet,
     sorting_fields = {
         'city_name': 'city__name'
     }
-
-    def get_parsers(self):
-        if getattr(self, 'swagger_fake_view', False):
-            return []
-
-        return super().get_parsers()
 
     def get_queryset(self):
         user = self.request.user
@@ -244,19 +243,19 @@ class ShopViewSet(BaseViewSet,
         shop = add_shop(serializer.validated_data)
         return shop
 
-    # def perform_update(self, serializer):
-    #     pk = self.kwargs['pk']
-    #     shop = update_shop(pk, serializer.validated_data)
-    #     return shop
-    #
-    # def perform_destroy(self, instance):
-    #     user = self.request.user
-    #     crm_user = user.crm_user
-    #     if crm_user.role == RoleType.ADMIN:
-    #         pk = self.kwargs['pk']
-    #         delete_shop(pk)
-    #     else:
-    #         raise ValidationError('Only admin can delete shops.')
+    def perform_update(self, serializer):
+        pk = self.kwargs['pk']
+        shop = update_shop(pk, serializer.validated_data)
+        return shop
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        crm_user = user.crm_user
+        if crm_user.role == RoleType.ADMIN:
+            pk = self.kwargs['pk']
+            delete_shop(pk)
+        else:
+            raise ValidationError('Only admin can delete shops.')
 
     @method_decorator(name='create',
                       decorator=swagger_auto_schema(tags=['shops'],
@@ -277,23 +276,25 @@ class ShopViewSet(BaseViewSet,
         else:
             raise ValidationError('Only admin can add shops')
 
-    # @method_decorator(name='update',
-    #                   decorator=swagger_auto_schema(tags=['shops'],
-    #                                                 request_body=ShopCreateSerializer,
-    #                                                 responses={
-    #                                                     200: ShopSerializer(),
-    #                                                 }))
-    # def update(self, request, *args, **kwargs):
-    #     serializer = ShopCreateSerializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     instance = self.perform_update(serializer)
-    #
-    #     if getattr(instance, '_prefetched_objects_cache', None):
-    #         instance._prefetched_objects_cache = {}
-    #
-    #     serializer = ShopSerializer(instance=instance)
-    #
-    #     return Response(serializer.data)
+    @method_decorator(name='update',
+                      decorator=swagger_auto_schema(tags=['shops'],
+                                                    request_body=ShopCreateSerializer,
+                                                    responses={
+                                                        200: ShopSerializer(),
+                                                    }))
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        serializer = ShopSerializer(instance=instance)
+        return Response(serializer.data)
 
     @method_decorator(name='all', decorator=swagger_auto_schema(tags=['shops'],
                                                                 responses={
@@ -302,5 +303,5 @@ class ShopViewSet(BaseViewSet,
     @action(methods=['GET'], detail=False, url_path='all')
     def all(self, request, *args, **kwargs):
         items = self.filter_queryset(self.get_queryset())
-        serializer = ShopSimpleSerializer(items, many=True)
+        serializer = self.get_serializer(items, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)

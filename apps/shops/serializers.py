@@ -4,7 +4,6 @@ from apps.shops.models import Shop, City, Country
 
 
 class CountrySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Country
         fields = (
@@ -34,7 +33,6 @@ class CitySerializer(serializers.ModelSerializer):
 
 
 class CitySimpleSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = City
         fields = (
@@ -79,6 +77,7 @@ class ShopSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         return obj.image.url if obj.image else None
+
 
 class ShopSimpleSerializer(serializers.ModelSerializer):
     class Meta:
