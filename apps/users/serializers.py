@@ -32,7 +32,7 @@ class CRMUserSerializer(serializers.ModelSerializer):
             'name',
             'phone_number',
             'role',
-            'shop',
+            'shop_id',
             'shop_name'
         )
 

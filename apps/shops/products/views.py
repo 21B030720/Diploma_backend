@@ -8,10 +8,11 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from apps.shops.products.models import ProductCategory
+from apps.shops.products.models import ProductCategory, Product
 from apps.shops.products.serializers import ProductCategorySerializer, ProductCategoryCreateSerializer, \
-    ProductCategorySimpleSerializer
-from apps.shops.products.services import add_product_category, update_product_category, delete_product_category
+    ProductCategorySimpleSerializer, ProductSerializer, ProductSimpleSerializer, ProductCreateSerializer
+from apps.shops.products.services import add_product_category, update_product_category, delete_product_category, \
+    add_product, delete_product, update_product
 from apps.users.permissions import IsAdminOrReadOnly, IsManagerOrReadOnly
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
@@ -40,7 +41,7 @@ class ProductCategoryViewSet(BaseViewSet,
         'shop'
     )
     serializer_class = ProductCategorySerializer
-    parser_classes = (DrfNestedParser, )
+    parser_classes = (DrfNestedParser,)
     serializers = {
         'create': ProductCategoryCreateSerializer,
         'update': ProductCategoryCreateSerializer,
@@ -53,10 +54,11 @@ class ProductCategoryViewSet(BaseViewSet,
         queryset = super().get_queryset()
         user = self.request.user
 
-        if user.crm_user.role == RoleType.ADMIN:
-            pass
-        elif user.crm_user.role == RoleType.MANAGER:
-            queryset = queryset.filter(shop_id=user.crm_user.shop_id)
+        if hasattr(user, 'crm_user'):
+            if user.crm_user.role == RoleType.ADMIN:
+                pass
+            elif user.crm_user.role == RoleType.MANAGER:
+                queryset = queryset.filter(shop_id=user.crm_user.shop_id)
 
         return queryset
 
@@ -110,6 +112,105 @@ class ProductCategoryViewSet(BaseViewSet,
     @method_decorator(name='all', decorator=swagger_auto_schema(tags=['products-categories'],
                                                                 responses={
                                                                     200: ProductCategorySimpleSerializer(many=True)
+                                                                }))
+    @action(methods=['GET'], detail=False, url_path='all')
+    def all(self, request, *args, **kwargs):
+        items = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(items, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+@method_decorator(
+    name='list',
+    decorator=swagger_auto_schema(
+        tags=['products']
+    )
+)
+@method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['products']))
+@method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['products']))
+class ProductViewSet(BaseViewSet,
+                     mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.UpdateModelMixin,
+                     mixins.DestroyModelMixin,
+                     GenericViewSet
+                     ):
+    queryset = Product.objects.select_related(
+        'shop'
+    )
+    serializer_class = ProductSerializer
+    parser_classes = (DrfNestedParser, JSONParser)
+    serializers = {
+        'create': ProductCreateSerializer,
+        'update': ProductCreateSerializer,
+        'all': ProductSimpleSerializer
+    }
+    filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+
+        if hasattr(user, 'crm_user'):
+            if user.crm_user.role == RoleType.ADMIN:
+                pass
+            elif user.crm_user.role == RoleType.MANAGER:
+                queryset = queryset.filter(shop_id=user.crm_user.shop_id)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        product = add_product(serializer.validated_data)
+        return product
+
+    def perform_update(self, serializer):
+        pk = self.kwargs['pk']
+        category = update_product(pk, serializer.validated_data)
+        return category
+
+    def perform_destroy(self, instance):
+        pk = self.kwargs['pk']
+        delete_product(pk)
+
+    @method_decorator(name='create',
+                      decorator=swagger_auto_schema(tags=['products'],
+                                                    request_body=ProductCreateSerializer,
+                                                    responses={
+                                                        200: ProductSerializer(),
+                                                    }))
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = self.perform_create(serializer)
+        serializer = ProductSerializer(obj)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @method_decorator(name='update',
+                      decorator=swagger_auto_schema(tags=['products'],
+                                                    request_body=ProductCreateSerializer,
+                                                    responses={
+                                                        200: ProductSerializer(),
+                                                    }))
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        serializer = ProductSerializer(instance=instance)
+        return Response(serializer.data)
+
+    @method_decorator(name='all', decorator=swagger_auto_schema(tags=['products'],
+                                                                responses={
+                                                                    200: ProductSimpleSerializer(many=True)
                                                                 }))
     @action(methods=['GET'], detail=False, url_path='all')
     def all(self, request, *args, **kwargs):

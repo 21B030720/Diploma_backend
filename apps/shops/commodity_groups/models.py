@@ -24,6 +24,6 @@ class CommodityGroupCategory(DeletedMixin, TimestampMixin):
 class CommodityGroup(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=255)
     image = models.ImageField(upload_to=upload_commodity_group_image)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(CommodityGroupCategory, on_delete=models.CASCADE, related_name='commodity_groups')
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='commodity_groups')

@@ -53,7 +53,7 @@ class CityCreateSerializer(serializers.ModelSerializer):
 
 
 class ShopSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
+    # image = serializers.SerializerMethodField()
     city_name = serializers.CharField(source='city.name')
 
     class Meta:
@@ -75,8 +75,8 @@ class ShopSerializer(serializers.ModelSerializer):
             'two_gis_link',
         )
 
-    def get_image(self, obj):
-        return obj.image.url if obj.image else None
+    # def get_image(self, obj):
+    #     return obj.image.url if obj.image else None
 
 
 class ShopSimpleSerializer(serializers.ModelSerializer):

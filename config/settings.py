@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
+
+from corsheaders.defaults import default_headers
 from django.utils.translation import gettext_lazy as _
 import environ
 
@@ -68,7 +70,13 @@ INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://localhost:8000"
+    "http://localhost:8000",
+    "https://b773-147-30-12-31.ngrok-free.app"
+]
+
+CORS_ALLOW_HEADERS = [
+    *default_headers,
+    "ngrok-skip-browser-warning",
 ]
 
 MIDDLEWARE = [
@@ -190,7 +198,10 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20
 }
 
-CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'https://b773-147-30-12-31.ngrok-free.app',
+]
 
 AUTH_USER_MODEL = 'users.User'
 

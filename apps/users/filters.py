@@ -1,0 +1,14 @@
+from django_filters import rest_framework as filters
+
+from apps.users.models import CRMUser
+
+
+class CRMUserFilterSet(filters.FilterSet):
+    name = filters.CharFilter(field_name='name', lookup_expr='icontains')
+
+    class Meta:
+        model = CRMUser
+        fields = {
+            'shop_id': ['exact'],
+            'role': ['exact']
+        }

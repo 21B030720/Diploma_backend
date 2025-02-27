@@ -1,4 +1,5 @@
 from django.utils.decorators import method_decorator
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
@@ -7,10 +8,12 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from apps.users.filters import CRMUserFilterSet
 from apps.users.models import CRMUser, User
 from apps.users.permissions import IsAdminOrReadOnly
 from apps.users.serializers import CustomTokenObtainPairSerializer, CRMUserSerializer, CRMUserCreateSerializer
 from apps.users.services import create_user, update_user
+from apps.utils.filters import SortingFilterBackend
 from apps.utils.serializers import BadRequestSerializer
 from apps.utils.views import BaseViewSet
 
@@ -37,6 +40,8 @@ class CRMUserViewSet(BaseViewSet,
         'create': CRMUserCreateSerializer,
         'update': CRMUserCreateSerializer,
     }
+    filter_backends = (DjangoFilterBackend, SortingFilterBackend)
+    filterset_class = CRMUserFilterSet
     permission_classes = [IsAdminOrReadOnly]
 
     def check_permissions(self, request):

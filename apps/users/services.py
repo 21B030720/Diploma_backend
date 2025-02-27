@@ -13,15 +13,7 @@ def create_user(data):
 
     existing_user = User.all_objects.filter(username__iexact=username).first()
     if existing_user is not None:
-        if existing_user.deleted:
-            existing_user.deleted = False
-            existing_user.crm_user.deleted = False
-            existing_user.save(update_fields=['deleted'])
-            existing_user.crm_user.save(update_fields=['deleted'])
-            crm_user = update_user(existing_user.crm_user.id, data)
-            return crm_user
-        else:
-            raise ValidationError('Пользователь с таким логином уже существует.')
+        raise ValidationError('Пользователь с таким логином уже существует.')
     else:
         user_data = data.pop('user')
         user_data['username'] = username
