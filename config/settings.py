@@ -64,6 +64,7 @@ CUSTOM_APPS = [
     'apps.shops.products.apps.ProductsConfig',
     'apps.shops.commodity_groups.apps.CommodityGroupsConfig',
     'apps.shops.bundles.apps.BundlesConfig',
+    'apps.activities.apps.ActivitiesConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS

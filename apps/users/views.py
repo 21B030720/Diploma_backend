@@ -66,7 +66,7 @@ class CRMUserViewSet(BaseViewSet,
     def perform_destroy(self, instance):
         pk = self.kwargs['pk']
         crm_user = CRMUser.objects.filter(pk=pk).first()
-        CRMUser.objects.filter(pk=pk).update(deleted=True, role=None)
+        CRMUser.objects.filter(pk=pk).update(deleted=True)
         User.objects.filter(pk=crm_user.user.pk).update(deleted=True)
 
     @method_decorator(name='create',
@@ -102,11 +102,11 @@ class CRMUserViewSet(BaseViewSet,
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        crm_user = self.perform_update(serializer)
 
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
 
-        serializer = CRMUserSerializer(instance=instance)
+        serializer = CRMUserSerializer(instance=crm_user)
 
         return Response(serializer.data)
