@@ -14,7 +14,7 @@ from apps.shops.products.serializers import ProductCategorySerializer, ProductCa
     ProductCategorySimpleSerializer, ProductSerializer, ProductSimpleSerializer, ProductCreateSerializer
 from apps.shops.products.services import add_product_category, update_product_category, delete_product_category, \
     add_product, delete_product, update_product
-from apps.users.permissions import IsAdminOrReadOnly, IsManagerOrReadOnly
+from apps.users.permissions import IsAdmin, IsManager, ReadOnly
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.views import BaseViewSet
@@ -50,7 +50,7 @@ class ProductCategoryViewSet(BaseViewSet,
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = ProductCategoryFilterSet
-    permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
+    permission_classes = [IsAdmin | IsManager | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -150,7 +150,7 @@ class ProductViewSet(BaseViewSet,
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = ProductFilterSet
-    permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
+    permission_classes = [IsAdmin | IsManager | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()

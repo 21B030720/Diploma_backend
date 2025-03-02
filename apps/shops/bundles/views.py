@@ -13,7 +13,7 @@ from apps.shops.bundles.models import Bundle
 from apps.shops.bundles.serializers import BundleSerializer, BundleCreateSerializer
 from apps.shops.bundles.services import add_bundle, update_bundle, delete_bundle
 from apps.shops.products.serializers import ProductSerializer
-from apps.users.permissions import IsAdminOrReadOnly, IsManagerOrReadOnly
+from apps.users.permissions import IsAdmin, IsManager, ReadOnly
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.views import BaseViewSet
@@ -51,7 +51,7 @@ class BundleViewSet(BaseViewSet,
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = BundleFilterSet
-    permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
+    permission_classes = [IsAdmin | IsManager | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()

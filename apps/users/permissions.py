@@ -16,7 +16,7 @@ class ReadOnly(BasePermission):
             return request.method in SAFE_METHODS
 
 
-class IsAdminOrReadOnly(IsCRMUser):
+class IsAdmin(IsCRMUser):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
             crm_user = request.user.crm_user
@@ -24,7 +24,7 @@ class IsAdminOrReadOnly(IsCRMUser):
         return False
 
 
-class IsManagerOrReadOnly(IsCRMUser):
+class IsManager(IsCRMUser):
     message = 'У вас нет разрешения для выполнения этого действия.'
 
     def has_permission(self, request, view):

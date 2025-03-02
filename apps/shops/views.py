@@ -16,7 +16,7 @@ from apps.shops.serializers import ShopSerializer, ShopCreateSerializer, ShopSim
 from apps.shops.services import add_shop, add_city, update_city, delete_city, add_country, update_country, \
     delete_country, delete_shop, update_shop
 from apps.users.models import CRMUser
-from apps.users.permissions import IsAdminOrReadOnly, IsManagerOrReadOnly, ReadOnly
+from apps.users.permissions import IsAdmin, IsManager, ReadOnly
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.serializers import EmptySerializer
@@ -45,7 +45,7 @@ class CountryViewSet(BaseViewSet,
         'destroy': EmptySerializer,
         'all': CountrySerializer,
     }
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdmin | ReadOnly]
     queryset = Country.objects.order_by('name')
     filter_backends = (filters.DjangoFilterBackend, SortingFilterBackend)
     filterset_class = CountryFilterSet
@@ -126,7 +126,7 @@ class CityViewSet(
         'destroy': EmptySerializer,
         'all': CitySimpleSerializer,
     }
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdmin | ReadOnly]
     queryset = City.objects.all().order_by('name')
     filter_backends = (filters.DjangoFilterBackend, SortingFilterBackend)
     filterset_class = CityFilterSet
@@ -218,7 +218,7 @@ class ShopViewSet(BaseViewSet,
         'update': ShopCreateSerializer,
         'all': ShopSimpleSerializer
     }
-    permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
+    permission_classes = [IsAdmin | IsManager | ReadOnly]
 
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = ShopFilterSet

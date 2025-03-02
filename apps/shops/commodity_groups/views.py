@@ -15,7 +15,7 @@ from apps.shops.commodity_groups.serializers import CommodityGroupCategorySerial
 from apps.shops.commodity_groups.services import add_commodity_group_category, update_commodity_group_category, \
     delete_commodity_group_category, update_commodity_group, add_commodity_group, delete_commodity_group
 from apps.shops.products.serializers import ProductSerializer
-from apps.users.permissions import IsAdminOrReadOnly, IsManagerOrReadOnly
+from apps.users.permissions import IsAdmin, IsManager, ReadOnly
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.views import BaseViewSet
@@ -51,7 +51,7 @@ class CommodityGroupCategoryViewSet(BaseViewSet,
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = CommodityGroupCategoryFilterSet
-    permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
+    permission_classes = [IsAdmin | IsManager | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -152,7 +152,7 @@ class CommodityGroupViewSet(BaseViewSet,
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = CommodityGroupFilterSet
-    permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
+    permission_classes = [IsAdmin | IsManager | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()

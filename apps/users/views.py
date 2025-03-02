@@ -10,7 +10,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from apps.users.filters import CRMUserFilterSet
 from apps.users.models import CRMUser, User
-from apps.users.permissions import IsAdminOrReadOnly
+from apps.users.permissions import IsAdmin
 from apps.users.serializers import CustomTokenObtainPairSerializer, CRMUserSerializer, CRMUserCreateSerializer
 from apps.users.services import create_user, update_user
 from apps.utils.filters import SortingFilterBackend
@@ -42,7 +42,7 @@ class CRMUserViewSet(BaseViewSet,
     }
     filter_backends = (DjangoFilterBackend, SortingFilterBackend)
     filterset_class = CRMUserFilterSet
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdmin]
 
     def check_permissions(self, request):
         if self.action == 'create':
