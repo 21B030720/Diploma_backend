@@ -8,6 +8,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.shops.products.filters import ProductCategoryFilterSet, ProductFilterSet
 from apps.shops.products.models import ProductCategory, Product
 from apps.shops.products.serializers import ProductCategorySerializer, ProductCategoryCreateSerializer, \
     ProductCategorySimpleSerializer, ProductSerializer, ProductSimpleSerializer, ProductCreateSerializer
@@ -48,6 +49,7 @@ class ProductCategoryViewSet(BaseViewSet,
         'all': ProductCategorySimpleSerializer
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = ProductCategoryFilterSet
     permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
 
     def get_queryset(self):
@@ -147,6 +149,7 @@ class ProductViewSet(BaseViewSet,
         'all': ProductSimpleSerializer
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = ProductFilterSet
     permission_classes = [IsAdminOrReadOnly | IsManagerOrReadOnly]
 
     def get_queryset(self):
