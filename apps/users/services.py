@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
 from apps.users.models import User, CRMUser, ClientUser
+from apps.wallets.models import Wallet
 
 
 @transaction.atomic
@@ -54,15 +55,16 @@ def create_client_user(data):
     existing_user = User.all_objects.filter(username__iexact=username).first()
     if existing_user is not None:
         raise ValidationError('User with this username already exists.')
-    else:
-        user_data = data.pop('user')
-        user_data['username'] = username
-        user = User.objects.create(**user_data)
-        user.set_password(password)
-        user.save()
-        validate_client_user(data)
-        client_user = ClientUser.objects.create(**data, user=user)
-        return client_user
+
+    user_data = data.pop('user')
+    user_data['username'] = username
+    user = User.objects.create(**user_data)
+    user.set_password(password)
+    user.save()
+    validate_client_user(data)
+    client_user = ClientUser.objects.create(**data, user=user)
+    Wallet.objects.create(client_user=client_user)
+    return client_user
 
 
 def validate_client_user(client_data):

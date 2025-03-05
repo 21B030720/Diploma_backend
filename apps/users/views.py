@@ -206,7 +206,7 @@ class ClientUserViewSet(BaseViewSet,
         password = data.get('password')
 
         client_user = ClientUser.objects.filter(
-            Q(email__iexact=username_or_email) | Q(user__username__iexact=username_or_email)
+            (Q(email__iexact=username_or_email) & Q(is_email_valid=True)) | Q(user__username__iexact=username_or_email)
         ).first()
 
         if not client_user:

@@ -40,6 +40,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('apps.users.urls')),
     path('shops/', include('apps.shops.urls')),
+    path('wallets/', include('apps.wallets.urls'))
 ]
 
 swagger_patterns = [
