@@ -41,3 +41,13 @@ class Measures(TextChoices):
     WEIGHT = 'KG', 'KG'
     LITER = 'L', 'L'
     PIECE = 'PC', 'PC'
+
+
+class TransactionType(TextChoices):
+    DEPOSIT = 'deposit', 'deposit'
+
+
+class TransactionStatus(TextChoices):
+    FINISHED = 'finished', 'finished'
+    PENDING = 'pending', 'pending'
+    CANCELED = 'canceled', 'canceled'
