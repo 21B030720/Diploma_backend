@@ -31,3 +31,11 @@ class CRMUser(DeletedMixin, TimestampMixin):
     phone_number = PhoneNumberField(blank=True)
     role = models.CharField(choices=RoleType.choices, max_length=255)
     shop = models.ForeignKey('shops.Shop', on_delete=models.CASCADE, related_name='users', null=True)
+
+
+class ClientUser(DeletedMixin, TimestampMixin):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='client_user')
+    name = models.CharField(max_length=255)
+    phone_number = PhoneNumberField(unique=True)
+    email = models.EmailField(db_index=True, unique=True)
+    is_email_valid = models.BooleanField(default=False, blank=True)

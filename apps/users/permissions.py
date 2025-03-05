@@ -19,8 +19,9 @@ class ReadOnly(BasePermission):
 class IsAdmin(IsCRMUser):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
-            crm_user = request.user.crm_user
-            return (crm_user and (crm_user.role == RoleType.ADMIN)) or request.method in SAFE_METHODS
+            user = request.user
+            crm_user = getattr(user, 'crm_user', None)
+            return crm_user and (crm_user.role == RoleType.ADMIN)
         return False
 
 
@@ -29,6 +30,13 @@ class IsManager(IsCRMUser):
 
     def has_permission(self, request, view):
         if super().has_permission(request, view):
-            crm_user = request.user.crm_user
-            return (crm_user and (crm_user.role == RoleType.MANAGER)) or request.method in SAFE_METHODS
+            user = request.user
+            crm_user = getattr(user, 'crm_user', None)
+            return crm_user and (crm_user.role == RoleType.MANAGER)
         return False
+
+
+class IsClientUser(IsAuthenticated):
+    def has_permission(self, request, view):
+        if super().has_permission(request, view):
+            return hasattr(request.user, 'client_user')
