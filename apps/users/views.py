@@ -7,6 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -229,3 +230,9 @@ class ClientUserViewSet(BaseViewSet,
 
         serializer = ClientUserSignInResponseSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_destroy(self, instance):
+        pk = self.kwargs['pk']
+        client_user = get_object_or_404(ClientUser, pk=pk)
+        client_user.deleted = True
+        client_user.save(update_fields=['deleted'])
