@@ -73,6 +73,7 @@ class NutritionCharacteristicsCreateSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     shop_name = serializers.CharField(source='shop.name')
+    category_name = serializers.CharField(source='category.name')
     nutrition_characteristics = NutritionCharacteristicsSerializer()
 
     class Meta:
@@ -84,6 +85,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'description',
             'rating',
             'category_id',
+            'category_name',
             'nutrition_characteristics',
             'from_age',
             'to_age',

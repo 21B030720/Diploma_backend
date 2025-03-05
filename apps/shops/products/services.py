@@ -27,7 +27,7 @@ def delete_product_category(pk):
 
 def create_nutrition_characteristics(data):
     if data is None:
-        nutrition_characteristics = ProductNutritionCharacteristics.objects.create()
+        return None
     else:
         nutrition_characteristics = ProductNutritionCharacteristics.objects.create(**data)
     return nutrition_characteristics
@@ -37,7 +37,7 @@ def create_nutrition_characteristics(data):
 def add_product(data):
     nutrition_characteristics_data = data.pop('nutrition_characteristics', None)
     nutrition_characteristics = create_nutrition_characteristics(nutrition_characteristics_data)
-    data['nutrition_characteristics_id'] = nutrition_characteristics.id
+    data['nutrition_characteristics'] = nutrition_characteristics
     product = Product.objects.create(**data)
     return product
 
@@ -46,9 +46,12 @@ def update_product(pk, data):
     product = get_object_or_404(Product, pk=pk)
     nutrition_characteristics_data = data.pop('nutrition_characteristics', None)
     nutrition_characteristics = product.nutrition_characteristics
-    for key, value in nutrition_characteristics_data.items():
-        setattr(nutrition_characteristics, key, value)
-    nutrition_characteristics.save()
+    if nutrition_characteristics is None:
+        product.nutrition_characteristics = None
+    else:
+        for key, value in nutrition_characteristics_data.items():
+            setattr(nutrition_characteristics, key, value)
+        nutrition_characteristics.save()
 
     for key, value in data.items():
         setattr(product, key, value)
