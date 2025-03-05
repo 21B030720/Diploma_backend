@@ -66,6 +66,7 @@ CUSTOM_APPS = [
     'apps.shops.bundles.apps.BundlesConfig',
     'apps.activities.apps.ActivitiesConfig',
     'apps.wallets.apps.WalletsConfig',
+    'apps.paybox.apps.PayboxConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS
@@ -256,3 +257,5 @@ DRF_NESTED_MULTIPART_PARSER = {
     # if is set to False, dict python is returned
     "querydict": False,
 }
+
+BASE_URL = os.getenv('BASE_URL', 'http://91.243.71.236')

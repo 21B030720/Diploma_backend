@@ -7,3 +7,7 @@ class BadRequestSerializer(serializers.Serializer):
 
 class EmptySerializer(serializers.Serializer):
     ...
+
+
+class MessageSerializer(serializers.Serializer):
+    message = serializers.CharField()

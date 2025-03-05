@@ -8,7 +8,7 @@ from apps.utils.models import DeletedMixin, TimestampMixin
 # Create your models here.
 class Wallet(DeletedMixin, TimestampMixin):
     client_user = models.OneToOneField(ClientUser, on_delete=models.CASCADE, related_name='wallet')
-    balance = models.DecimalField(max_digits=20, decimal_places=20, default=0)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
 class Transaction(DeletedMixin, TimestampMixin):

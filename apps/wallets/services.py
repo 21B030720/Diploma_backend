@@ -1,7 +1,7 @@
 from rest_framework.exceptions import ValidationError
 
 from apps.utils.enums import TransactionType, TransactionStatus
-from apps.wallets.models import Transaction
+from apps.wallets.models import Transaction, Wallet
 
 
 def create_transaction_for_deposit(wallet, data):
@@ -17,3 +17,13 @@ def create_transaction_for_deposit(wallet, data):
     )
 
     return transaction
+
+
+def finish_transaction(instance: Transaction) -> Transaction:
+    if instance.transaction_type == TransactionType.DEPOSIT:
+        wallet = Wallet.objects.get(id=instance.wallet.id)
+        wallet.balance += instance.amount
+        print(wallet.balance)
+        wallet.save(update_fields=['balance'])
+
+    return instance
