@@ -45,7 +45,7 @@ class CRMUserSerializer(serializers.ModelSerializer):
 
     def get_shop_name(self, obj):
         try:
-            return obj.user.shop.name
+            return obj.shop.name
         except AttributeError:
             return None
 
