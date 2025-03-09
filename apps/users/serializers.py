@@ -111,8 +111,8 @@ class ClientUserCreateSerializer(serializers.ModelSerializer):
 
 
 class ClientUserSignInSerializer(serializers.Serializer):
-    username_or_email = serializers.CharField(max_length=25)
-    password = serializers.CharField(max_length=25)
+    username_or_email = serializers.CharField(max_length=255)
+    password = serializers.CharField()
 
 
 class ClientUserSignInResponseSerializer(serializers.Serializer):

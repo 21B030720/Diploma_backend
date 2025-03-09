@@ -67,6 +67,7 @@ CUSTOM_APPS = [
     'apps.activities.apps.ActivitiesConfig',
     'apps.wallets.apps.WalletsConfig',
     'apps.paybox.apps.PayboxConfig',
+    'apps.send_pulse.apps.SendPulseConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS
@@ -259,3 +260,7 @@ DRF_NESTED_MULTIPART_PARSER = {
 }
 
 BASE_URL = os.getenv('BASE_URL', 'http://91.243.71.236')
+SEND_PULSE_SMTP_URL = os.getenv('SEND_PULSE_SMTP_URL')
+SEND_PULSE_TOKEN_URL = os.getenv('SEND_PULSE_TOKEN_URL')
+SEND_PULSE_ID = os.getenv('SEND_PULSE_ID')
+SEND_PULSE_SECRET = os.getenv('SEND_PULSE_SECRET')

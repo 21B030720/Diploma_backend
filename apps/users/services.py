@@ -3,6 +3,7 @@ from django.db.models import Q
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
+from apps.send_pulse.tasks import send_pulse_email
 from apps.users.models import User, CRMUser, ClientUser
 from apps.wallets.models import Wallet
 
@@ -64,6 +65,7 @@ def create_client_user(data):
     validate_client_user(data)
     client_user = ClientUser.objects.create(**data, user=user)
     Wallet.objects.create(client_user=client_user)
+    send_pulse_email.apply_async(args=[user.id])
     return client_user
 
 
