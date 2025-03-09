@@ -39,4 +39,4 @@ class IsManager(IsCRMUser):
 class IsClientUser(IsAuthenticated):
     def has_permission(self, request, view):
         if super().has_permission(request, view):
-            return hasattr(request.user, 'client_user')
+            return hasattr(request.user, 'client_user') and request.user.client_user.is_email_valid
