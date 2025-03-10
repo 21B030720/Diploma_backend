@@ -68,6 +68,7 @@ CUSTOM_APPS = [
     'apps.wallets.apps.WalletsConfig',
     'apps.paybox.apps.PayboxConfig',
     'apps.send_pulse.apps.SendPulseConfig',
+    'apps.deep_seek.apps.DeepSeekConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS

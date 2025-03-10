@@ -42,7 +42,8 @@ urlpatterns = [
     path('shops/', include('apps.shops.urls')),
     path('wallets/', include('apps.wallets.urls')),
     path('paybox/', include('apps.paybox.urls')),
-    path('emails/', include('apps.send_pulse.urls'))
+    path('emails/', include('apps.send_pulse.urls')),
+    path('deep-seek/', include('apps.deep_seek.urls')),
 ]
 
 swagger_patterns = [
