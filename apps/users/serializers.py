@@ -51,8 +51,8 @@ class CRMUserSerializer(serializers.ModelSerializer):
 
 
 class CRMUserCreateSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=25)
-    password = serializers.CharField(max_length=25)
+    username = serializers.CharField(max_length=255)
+    password = serializers.CharField(max_length=255, required=False, allow_null=True)
     shop_id = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.values_list('id', flat=True))
 
     class Meta:

@@ -38,7 +38,8 @@ def update_user(pk, data):
     if existing_user:
         raise ValidationError("User with that username already exists.")
     user.username = username.lower()
-    user.set_password(password)
+    if password:
+        user.set_password(password)
     user.save()
     for key, value in data.items():
         setattr(crm_user, key, value)
