@@ -40,6 +40,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('apps.users.urls')),
     path('shops/', include('apps.shops.urls')),
+    path('activities/', include('apps.activities.urls')),
     path('wallets/', include('apps.wallets.urls')),
     path('paybox/', include('apps.paybox.urls')),
     path('emails/', include('apps.send_pulse.urls'))
