@@ -237,6 +237,18 @@ REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '')
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://:{redis_password}@{redis_host}:{redis_port}".format(
+            redis_host=REDIS_HOST,
+            redis_port=REDIS_PORT,
+            redis_password=REDIS_PASSWORD
+        ),
+        'TIMEOUT': None,
+    }
+}
+
 CELERY_BROKER_URL = 'redis://:{redis_password}@{host}:{port}'.format(
     host=REDIS_HOST,
     port=REDIS_PORT,
@@ -265,3 +277,5 @@ SEND_PULSE_SMTP_URL = os.getenv('SEND_PULSE_SMTP_URL')
 SEND_PULSE_TOKEN_URL = os.getenv('SEND_PULSE_TOKEN_URL')
 SEND_PULSE_ID = os.getenv('SEND_PULSE_ID')
 SEND_PULSE_SECRET = os.getenv('SEND_PULSE_SECRET')
+DEEP_SEEK_API_KEY = os.getenv('DEEP_SEEK_API_KEY')
+DEEP_SEEK_BASE_URL = os.getenv('DEEP_SEEK_BASE_URL')
