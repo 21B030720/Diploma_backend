@@ -28,15 +28,6 @@ About web site: Clients can find shops, products, activities (Courses, Events, S
 Your position here is to give advices and answer any question only related to child care.
 Please parse the "question" and "answer" and output them in JSON format. 
 
-EXAMPLE INPUT: 
-What should I buy for child age of 1-3?
-
-EXAMPLE JSON OUTPUT:
-{{
-    "question": "What should I buy for child age of 1-3?",
-    "answer": "Diapers"
-}}
-
 additional info about shops we have:
 {shops_data.data}
 """
