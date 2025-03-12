@@ -43,7 +43,7 @@ additional info about shops we have:
 cache.set('deep_seek_system_prompt', system_prompt)
 
 
-def test_deep_sekk(message):
+def test_deep_seek(message):
     try:
         prompt = cache.get('deep_seek_system_prompt')
         exception_counter = 0
@@ -57,15 +57,12 @@ def test_deep_sekk(message):
                 {"role": "system", "content": cache.get('deep_seek_system_prompt')},
                 {"role": "user", "content": message},
             ],
-            response_format={
-                'type': 'json_object'
-            },
             max_tokens=1024,
             temperature=1.2,
             stream=False
         )
-        print(response)
-        print(type(response))
-        print(response.choices[0].message.content)
+        result = {}
+        result['message'] = response.choices[0].message.content
+        return result
     except APIStatusError as e:
         print(e.message)
