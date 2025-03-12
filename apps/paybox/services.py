@@ -52,8 +52,8 @@ def start_init_payment(transaction_id):
         'pg_currency': 'KZT',
         'pg_language': 'ru',
         'pg_testing_mode': '1',
-        'pg_success_url': f'{settings.KAMPITIK_FRONT_URL}/en/payment-status?status=success',
-        'pg_failure_url': f'{settings.KAMPITIK_FRONT_URL}/en/payment-status?status=failure',
+        'pg_success_url': f'{settings.KAMPITIK_FRONT_URL}/en/payment-status/success',
+        'pg_failure_url': f'{settings.KAMPITIK_FRONT_URL}/en/payment-status/failure',
         'pg_result_url': f'{settings.BASE_URL}/paybox/result/payment/',  # 8001 port for testing
         'pg_user_phone': f'{phone_number}',
         'pg_user_id': f'{client_user.user.id}'
@@ -84,8 +84,8 @@ def pay_with_saved_card(card_id, transaction_id):
         'pg_description': f'Перевод денег: {phone_number}',
         'pg_card_token': card.card_token,
         'pg_result_url': f'{settings.BASE_URL}/paybox/result/payment/',
-        'pg_success_url': f'{settings.KAMPITIK_FRONT_URL}/en/payment-status?status=success',
-        'pg_failure_url': f'{settings.KAMPITIK_FRONT_URL}/en/payment-status?status=failure',
+        'pg_success_url': f'{settings.KAMPITIK_FRONT_URL}/en/payment-status/success',
+        'pg_failure_url': f'{settings.KAMPITIK_FRONT_URL}/en/payment-status/failure',
         'pg_salt': salt,
     }
     first_step_post_data['pg_sig'] = generate_sign(first_step_post_data, 'init')
