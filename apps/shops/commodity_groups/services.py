@@ -39,7 +39,9 @@ def update_commodity_group(pk, data):
 
     for key, value in data.items():
         setattr(commodity_group, key, value)
-    Product.objects.filter(id__in=products).update(commodity_group=commodity_group)
+    products_objects = Product.objects.filter(id__in=products)
+    Product.objects.filter(commodity_group=commodity_group).update(commodity_group=None)
+    products_objects.update(commodity_group=commodity_group)
     commodity_group.save()
     return commodity_group
 
