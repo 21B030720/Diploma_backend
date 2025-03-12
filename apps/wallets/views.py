@@ -71,7 +71,7 @@ class WalletViewSet(
     def transactions_history(self, request):
         user = self.request.user
         wallet = get_object_or_404(Wallet, client_user=user.client_user)
-        transactions = Transaction.objects.filter(wallet=wallet)
+        transactions = Transaction.objects.filter(wallet=wallet).order_by('-created_at')
 
         page = self.paginate_queryset(transactions)
         if page is not None:
