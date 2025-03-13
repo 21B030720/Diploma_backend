@@ -10,7 +10,6 @@ from apps.shops.products.models import ProductCategory, Product
 from config import settings
 
 # for backward compatibility, you can still use `https://api.deepseek.com/v1` as `base_url`.
-client = OpenAI(api_key=settings.DEEP_SEEK_API_KEY, base_url=settings.DEEP_SEEK_BASE_URL)
 
 shops = Shop.objects.select_related(
     'city',
@@ -26,7 +25,6 @@ system_prompt = f"""
 The user is a client of web site related to child support. And you are AI assistant called "Kampitik-Bot".
 About web site: Clients can find shops, products, activities (Courses, Events, Services(Baby sitters etc.))
 Your position here is to give advices and answer any question only related to child care.
-Please parse the "question" and "answer" and output them in JSON format. 
 
 additional info about shops we have:
 {shops_data.data}
@@ -36,6 +34,7 @@ cache.set('deep_seek_system_prompt', system_prompt)
 
 def test_deep_seek(message):
     try:
+        client = OpenAI(api_key=settings.DEEP_SEEK_API_KEY, base_url=settings.DEEP_SEEK_BASE_URL)
         prompt = cache.get('deep_seek_system_prompt')
         exception_counter = 0
         while prompt is None and exception_counter < 10:
