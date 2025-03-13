@@ -95,6 +95,7 @@ def update_course(pk, data):
     update_course_price_list(course, _course_prices)
 
     course.save()
+    return course
 
 
 def update_course_price_list(course, course_prices):
