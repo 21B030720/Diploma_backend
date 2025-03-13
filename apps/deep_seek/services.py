@@ -34,6 +34,7 @@ cache.set('deep_seek_system_prompt', system_prompt)
 
 def test_deep_seek(message):
     try:
+        print(settings.DEEP_SEEK_API_KEY)
         client = OpenAI(api_key=settings.DEEP_SEEK_API_KEY, base_url=settings.DEEP_SEEK_BASE_URL)
         prompt = cache.get('deep_seek_system_prompt')
         exception_counter = 0
