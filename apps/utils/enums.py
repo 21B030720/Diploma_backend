@@ -51,3 +51,10 @@ class TransactionStatus(TextChoices):
     FINISHED = 'finished', 'finished'
     PENDING = 'pending', 'pending'
     CANCELED = 'canceled', 'canceled'
+
+
+class CoursePaymentPeriod(TextChoices):
+    MONTHLY = 'monthly', 'monthly'
+    WEEKLY = 'weekly', 'weekly'
+    DAILY = 'daily', 'daily'
+    HOURLY = 'hourly', 'hourly'

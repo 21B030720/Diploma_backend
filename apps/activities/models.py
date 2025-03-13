@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps.utils.enums import CoursePaymentPeriod
 from apps.utils.models import DeletedMixin, TimestampMixin
 
 
@@ -56,5 +57,6 @@ class Course(DeletedMixin, TimestampMixin):
 class CoursePriceList(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=255)
     description = models.TextField()
-    price = models.DecimalField(max_digits=5, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_period = models.CharField(choices=CoursePaymentPeriod.choices, max_length=255, default=CoursePaymentPeriod.MONTHLY)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_prices')
