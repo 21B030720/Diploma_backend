@@ -29,31 +29,57 @@ Your position here is to give advices and answer any question only related to ch
 additional info about shops we have:
 {shops_data.data}
 """
-cache.set('deep_seek_system_prompt', system_prompt)
+cache.set('system_prompt', system_prompt)
 
 
-def test_deep_seek(message):
+def get_message_from_assistant(message, model_name='openai'):
+    response = ""
+    if model_name == 'openai':
+        response = get_response_from_openai(message)
+    elif model_name == 'deep_seek':
+        response = get_response_from_deep_seek(message)
+    result = dict()
+    result['message'] = response
+    return result
+
+
+def get_response_from_openai(message):
     try:
-        print(settings.DEEP_SEEK_API_KEY)
-        client = OpenAI(api_key=settings.DEEP_SEEK_API_KEY, base_url=settings.DEEP_SEEK_BASE_URL)
-        prompt = cache.get('deep_seek_system_prompt')
-        exception_counter = 0
-        while prompt is None and exception_counter < 10:
-            prompt = cache.get('deep_seek_system_prompt')
-            exception_counter += 1
-            logging.warning(f"Prompt for DeepSeek is empty, started exception counter: {exception_counter}")
+        client = OpenAI(api_key=settings.OPEN_AI_API_KEY)
+        prompt = cache.get('system_prompt')
+
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model='gpt-4o',
             messages=[
-                {"role": "system", "content": cache.get('deep_seek_system_prompt')},
+                {"role": "developer", "content": prompt},
                 {"role": "user", "content": message},
             ],
             max_tokens=1024,
             temperature=1.2,
             stream=False
         )
-        result = {}
-        result['message'] = response.choices[0].message.content
+        result = response.choices[0].message.content
         return result
     except APIStatusError as e:
-        print(e.message)
+        logging.warning(f"openai: {e}")
+
+
+def get_response_from_deep_seek(message):
+    try:
+        client = OpenAI(api_key=settings.DEEP_SEEK_API_KEY, base_url=settings.DEEP_SEEK_BASE_URL)
+        prompt = cache.get('system_prompt')
+
+        response = client.chat.completions.create(
+            model='gpt-4o',
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": message},
+            ],
+            max_tokens=1024,
+            temperature=1.2,
+            stream=False
+        )
+        result = response.choices[0].message.content
+        return result
+    except APIStatusError as e:
+        logging.warning(f"deepseek: {e}")

@@ -1,7 +1,7 @@
 from django.urls import path
 
-from apps.deep_seek.views import DeepSeekAPIView
+from apps.deep_seek.views import OpenAiAPIView
 
 urlpatterns = [
-    path('send-message/', DeepSeekAPIView.as_view(), name='deep_seek-send-message'),
+    path('send-message/', OpenAiAPIView.as_view(), name='openai-send-message'),
 ]
