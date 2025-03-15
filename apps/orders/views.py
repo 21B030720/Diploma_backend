@@ -29,12 +29,10 @@ from apps.utils.views import BaseViewSet
                       ]
                   ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['client-orders']))
-@method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['client-orders']))
 class ClientOrderViewSet(BaseViewSet,
                          mixins.CreateModelMixin,
                          mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
-                         mixins.DestroyModelMixin,
                          GenericViewSet
                          ):
     queryset = ClientOrder.objects.select_related(

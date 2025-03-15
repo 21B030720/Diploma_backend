@@ -152,5 +152,5 @@ class ChangeOrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientOrder
         fields = (
-            'status'
+            'status',
         )
