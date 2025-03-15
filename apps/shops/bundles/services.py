@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from rest_framework.generics import get_object_or_404
 
 from apps.shops.bundles.models import Bundle
@@ -5,20 +6,30 @@ from apps.shops.bundles.models import Bundle
 
 def add_bundle(data):
     products = data.pop('products', [])
+    discount = data.get('discount', 0)
     bundle = Bundle.objects.create(**data)
     bundle.products.set(products)
+    total_price_of_products = bundle.products.aggregate(total_price=Sum('price'))['total_price']
+    bundle_price = total_price_of_products * (100 - discount) / 100
+    bundle.price = bundle_price
+    bundle.save(update_fields=['price'])
     return bundle
 
 
 def update_bundle(pk, data):
     products = data.pop('products', [])
+    discount = data.get('discount', 0)
     bundle = get_object_or_404(Bundle, pk=pk)
 
     for key, value in data.items():
         setattr(bundle, key, value)
 
-    bundle.save()
     bundle.products.set(products)
+
+    total_price_of_products = bundle.products.aggregate(total_price=Sum('price'))['total_price']
+    bundle_price = total_price_of_products * (100 - discount) / 100
+    bundle.price = bundle_price
+    bundle.save()
     return bundle
 
 

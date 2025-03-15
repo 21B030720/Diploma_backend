@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.shops.bundles.models import Bundle
 from apps.shops.models import Shop
 from apps.shops.products.models import Product
+from apps.shops.products.serializers import ProductSimpleSerializer
 
 
 class BundleCreateSerializer(serializers.ModelSerializer):
@@ -14,7 +15,8 @@ class BundleCreateSerializer(serializers.ModelSerializer):
         fields = (
             'name',
             'products',
-            'shop_id'
+            'shop_id',
+            'discount'
         )
 
 
@@ -28,4 +30,6 @@ class BundleSerializer(serializers.ModelSerializer):
             'name',
             'shop_id',
             'shop_name',
+            'discount',
+            'price'
         )
