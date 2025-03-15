@@ -18,13 +18,19 @@ from apps.activities.services import delete_event_category, add_event_category, 
     update_course, delete_course
 from apps.users.permissions import IsAdmin, ReadOnly
 from apps.utils.filters import SortingFilterBackend
-from apps.utils.swagger_params import from_age_param, to_age_param
+from apps.utils.swagger_params import from_age_param, to_age_param, sort_param
 from apps.utils.views import BaseViewSet
 from config.parsers import DrfNestedParser
 
 
 # Create your views here.
-@method_decorator(name='list', decorator=swagger_auto_schema(tags=['event-categories']))
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['event-categories'],
+                      manual_parameters=[
+                          sort_param
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['event-categories']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['event-categories']))
 class EventCategoryViewSet(BaseViewSet,
@@ -112,6 +118,7 @@ class EventCategoryViewSet(BaseViewSet,
                   decorator=swagger_auto_schema(
                       tags=['events'],
                       manual_parameters=[
+                          sort_param,
                           from_age_param,
                           to_age_param
                       ]
@@ -200,7 +207,13 @@ class EventViewSet(BaseViewSet,
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-@method_decorator(name='list', decorator=swagger_auto_schema(tags=['course-categories']))
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['course-categories'],
+                      manual_parameters=[
+                          sort_param,
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['course-categories']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['course-categories']))
 class CourseCategoryViewSet(BaseViewSet,
@@ -284,7 +297,15 @@ class CourseCategoryViewSet(BaseViewSet,
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-@method_decorator(name='list', decorator=swagger_auto_schema(tags=['courses']))
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['courses'],
+                      manual_parameters=[
+                          sort_param,
+                          from_age_param,
+                          to_age_param
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['courses']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['courses']))
 class CourseViewSet(BaseViewSet,

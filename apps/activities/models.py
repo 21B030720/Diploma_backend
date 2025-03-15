@@ -1,4 +1,5 @@
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 from apps.utils.enums import CoursePaymentPeriod
 from apps.utils.models import DeletedMixin, TimestampMixin
@@ -28,7 +29,8 @@ class Event(DeletedMixin, TimestampMixin):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     tickets_left = models.PositiveIntegerField(default=0)
     organizator = models.CharField(max_length=255)
-    contacts = models.CharField(max_length=255)
+    contacts = PhoneNumberField()
+    social_networks = models.CharField(max_length=255, null=True)
     location = models.CharField(max_length=255)
     two_gis_link = models.URLField(null=True, blank=True)
     date_held = models.DateTimeField(null=True, blank=True)
@@ -47,7 +49,8 @@ class Course(DeletedMixin, TimestampMixin):
     image = models.ImageField(upload_to=upload_event_image, null=True, blank=True)
     description = models.TextField()
     company = models.CharField(max_length=255)
-    contacts = models.CharField(max_length=255)
+    contacts = PhoneNumberField()
+    social_networks = models.CharField(max_length=255, null=True)
     location = models.CharField(max_length=255)
     two_gis_link = models.URLField(null=True, blank=True)
     from_age = models.PositiveIntegerField(null=True, blank=True)

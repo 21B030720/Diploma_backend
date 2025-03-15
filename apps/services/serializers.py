@@ -99,6 +99,7 @@ class ServiceSerializer(serializers.ModelSerializer):
             'category_name',
             'service_provider',
             'service_type',
+            'details',
             'address',
             'price',
             'payment_period'
@@ -119,6 +120,7 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
             'category_id',
             'service_provider',
             'service_type',
+            'details',
             'address',
             'price',
             'payment_period',

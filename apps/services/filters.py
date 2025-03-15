@@ -13,7 +13,7 @@ class ServiceCategoryFilterSet(filters.FilterSet):
 
 
 class ServiceFilterSet(filters.FilterSet):
-    title = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    title = filters.CharFilter(field_name='title', lookup_expr='icontains')
     service_type = filters.CharFilter(field_name='service_type', lookup_expr='exact')
 
     class Meta:

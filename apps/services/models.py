@@ -31,9 +31,9 @@ class ServiceCategory(DeletedMixin, TimestampMixin):
 
 class ServiceProvider(DeletedMixin, TimestampMixin):
     full_name = models.CharField(max_length=255)
-    profile_photo = models.ImageField(upload_to=upload_service_personal_information_profile_photo)
+    profile_photo = models.ImageField(upload_to=upload_service_personal_information_profile_photo, null=True, blank=True)
     phone_number = PhoneNumberField()
-    email = models.EmailField()
+    email = models.EmailField(null=True, blank=True)
     social_networks = models.CharField(max_length=255, null=True, blank=True)
     resume = models.FileField(upload_to=upload_service_resume, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -59,6 +59,7 @@ class Service(DeletedMixin, TimestampMixin):
     title = models.CharField(max_length=255)
     service_provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE, related_name='services')
     service_type = models.CharField(choices=ServiceType.choices)
+    details = models.TextField()
     address = models.CharField(max_length=255, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     payment_period = models.CharField(choices=ServicePaymentPeriod.choices,

@@ -1,3 +1,4 @@
+from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from apps.activities.models import EventCategory, Event, Course, CourseCategory, CoursePriceList
@@ -40,6 +41,7 @@ class EventSerializer(serializers.ModelSerializer):
             'tickets_left',
             'organizator',
             'contacts',
+            'social_networks',
             'location',
             'two_gis_link',
             'date_held',
@@ -50,6 +52,7 @@ class EventSerializer(serializers.ModelSerializer):
 
 class EventCreateSerializer(serializers.ModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.values_list('id', flat=True))
+    contacts = PhoneNumberField()
 
     class Meta:
         model = Event
@@ -62,6 +65,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
             'tickets_left',
             'organizator',
             'contacts',
+            'social_networks',
             'location',
             'two_gis_link',
             'date_held',
@@ -133,6 +137,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'description',
             'company',
             'contacts',
+            'social_networks',
             'location',
             'two_gis_link',
             'from_age',
@@ -145,6 +150,7 @@ class CourseCreateSerializer(serializers.ModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(queryset=CourseCategory.objects.values_list('id', flat=True))
     image = serializers.ImageField(required=False)
     course_prices = CoursePriceListCreateSerializer(many=True)
+    contacts = PhoneNumberField()
 
     class Meta:
         model = Course
@@ -155,6 +161,7 @@ class CourseCreateSerializer(serializers.ModelSerializer):
             'description',
             'company',
             'contacts',
+            'social_networks',
             'location',
             'two_gis_link',
             'from_age',

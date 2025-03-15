@@ -22,7 +22,7 @@ class EventFilterSet(filters.FilterSet):
     class Meta:
         model = Event
         fields = {
-
+            'category_id': ['exact']
         }
 
     def filter_by_price_range(self, queryset, name, value):
