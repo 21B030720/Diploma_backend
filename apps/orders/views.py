@@ -14,7 +14,7 @@ from apps.orders.serializers import ClientOrderSerializer, ClientOrderCreateSeri
     OrderItemSerializer, OrderItemDetailSerializer, ChangeOrderItemStatusSerializer, ChangeOrderStatusSerializer
 from apps.orders.services import create_order, change_order_item_status, change_order_status
 from apps.users.permissions import IsClientUser, IsManager, IsAdmin
-from apps.utils.enums import RoleType, OrderItemStatus
+from apps.utils.enums import RoleType, OrderItemStatus, OrderStatus
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.swagger_params import sort_param, shop_id_param
 from apps.utils.views import BaseViewSet
@@ -101,8 +101,9 @@ class ClientOrderViewSet(BaseViewSet,
     def change_status(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        status = serializer.validated_data.get('status')
         obj = self.get_object()
-        order_item = change_order_status(obj, serializer.validated_data)
+        order_item = change_order_status(obj, status)
         serializer = ClientOrderSerializer(order_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -120,8 +121,8 @@ class OrderItemViewSet(BaseViewSet,
                        mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        GenericViewSet):
-    queryset = OrderItem.objects.exclude(
-        status=OrderItemStatus.CANCELLED
+    queryset = OrderItem.objects.select_related(
+        'client_order'
     ).order_by('-created_at')
     serializer_class = OrderItemSerializer
     serializers = {
@@ -147,7 +148,8 @@ class OrderItemViewSet(BaseViewSet,
             elif user.crm_user.role == RoleType.MANAGER:
                 shop_id = user.crm_user.shop_id
                 queryset = queryset.filter(shop_id=shop_id)
-
+        else:
+            queryset = queryset.filter(client_order__client_user_id=self.request.user.client_user.id)
         shop_ids = self.request.query_params.getlist('shop_id', [])
         if shop_ids:
             queryset = queryset.filter(shop_id__in=shop_ids)
@@ -161,11 +163,12 @@ class OrderItemViewSet(BaseViewSet,
                               201: OrderItemSerializer(),
                           }
                       ))
-    @action(detail=True, methods=['PUT'], url_path='update-status')
+    @action(detail=True, methods=['PUT'], url_path='update-status', permission_classes=[IsAdmin | IsManager | IsClientUser])
     def change_status(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        status_ = serializer.validated_data.get('status')
         obj = self.get_object()
-        order_item = change_order_item_status(obj, serializer.validated_data)
+        order_item = change_order_item_status(obj, status_)
         serializer = OrderItemSerializer(order_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

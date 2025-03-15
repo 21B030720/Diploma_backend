@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.db.models import Q, Sum
 
 from apps.shops.bundles.models import Bundle
 from apps.shops.models import Shop
@@ -18,6 +19,16 @@ class ClientOrder(DeletedMixin, TimestampMixin):
     overall_price = models.DecimalField(max_digits=10, decimal_places=2)
     final_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(choices=OrderStatus.choices, default=OrderStatus.WAITING)
+
+    # @property
+    # def current_final_price(self):
+    #     order_items_final_price = self.order_items.filter(
+    #         deleted=False
+    #     ).exclude(
+    #         status=OrderItemStatus.CANCELLED
+    #     ).aggregate(final_price=Sum('final_price'))['final_price']
+    #     print(order_items_final_price)
+    #     return order_items_final_price
 
 
 class OrderItem(DeletedMixin, TimestampMixin):

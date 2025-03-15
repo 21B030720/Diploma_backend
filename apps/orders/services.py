@@ -69,30 +69,40 @@ def create_order(user, data):
     return client_order
 
 
-def change_order_item_status(order_item, data):
-    status = data.get('status')
+@transaction.atomic
+def change_order_item_status(order_item, status):
 
     if order_item.status == OrderItemStatus.CANCELLED:
-        raise ValidationError("This order item is already cancelled.")
+        return order_item
+
+    order = order_item.client_order
 
     if status == OrderItemStatus.CANCELLED:
-        client_user = order_item.client_order.client_user
+        client_user = order.client_user
         wallet_withdrawal(client_user.wallet, -order_item.final_price)
-    order_item.status = status
+        order.final_price -= order_item.final_price
+        order.save(update_fields=['final_price'])
+        order_item.status = status
+        order_item.save(update_fields=['status'])
+    else:
+        order_item.status = status
+        order_item.save(update_fields=['status'])
 
-    order_item.save(update_fields=['status'])
+        update_order_status(order)
+
     return order_item
 
 
-def change_order_status(order, data):
-    status = data.get('status')
+@transaction.atomic
+def change_order_status(order: ClientOrder, status):
 
     if order.status == OrderStatus.CANCELLED:
-        raise ValidationError("This order is already cancelled.")
+        raise ValidationError("This order is cancelled.")
 
     if status == OrderStatus.CANCELLED:
-        client_user = order.client_user
-        wallet_withdrawal(client_user.wallet, -order.final_price)
+        order_items = order.order_items.all()
+        for order_item in order_items:
+            change_order_item_status(order_item, OrderItemStatus.CANCELLED)
     order.status = status
 
     order.save(update_fields=['status'])
@@ -106,3 +116,20 @@ def generate_unique_code_for_order_item(k=6):
             return code
 
 
+def update_order_status(order):
+    if order.status == OrderStatus.CANCELLED:
+        raise ValidationError("This order is already cancelled.")
+
+    order_items = order.order_items.all()
+    statuses = {item.status for item in order_items}
+
+    if statuses == {OrderItemStatus.GIVEN_TO_CUSTOMER}:
+        order.status = OrderStatus.TOTALLY_GIVEN
+    elif statuses == {OrderItemStatus.WAITING_FOR_COURIER}:
+        order.status = OrderStatus.WAITING
+    elif OrderItemStatus.GIVEN_TO_CUSTOMER in statuses:
+        order.status = OrderStatus.PARTIALLY_GIVEN
+    else:
+        order.status = OrderStatus.WAITING
+
+    order.save(update_fields=['status'])
