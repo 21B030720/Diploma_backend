@@ -71,3 +71,22 @@ class ServicePaymentPeriod(TextChoices):
     WEEKLY = 'weekly', 'weekly'
     DAILY = 'daily', 'daily'
     HOURLY = 'hourly', 'hourly'
+
+
+class ItemType(TextChoices):
+    PRODUCT = 'PRODUCT', 'PRODUCT'
+    BUNDLE = 'BUNDLE', 'BUNDLE'
+
+
+class OrderStatus(TextChoices):
+    WAITING = 'WAITING', 'WAITING'
+    PARTIALLY_GIVEN = 'PARTIALLY_GIVEN', 'PARTIALLY_GIVEN'
+    TOTALLY_GIVEN = 'TOTALLY_GIVEN', 'TOTALLY_GIVEN'
+    CANCELLED = 'CANCELLED', 'CANCELLED'
+
+
+class OrderItemStatus(TextChoices):
+    WAITING_FOR_COURIER = 'WAITING_FOR_COURIER', 'WAITING_FOR_COURIER'
+    GIVEN_TO_COURIER = 'GIVEN_TO_COURIER', 'GIVEN_TO_COURIER'
+    GIVEN_TO_CUSTOMER = 'GIVEN_TO_CUSTOMER', 'GIVEN_TO_CUSTOMER'
+    CANCELLED = 'CANCELLED', 'CANCELLED'

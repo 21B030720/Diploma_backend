@@ -27,3 +27,10 @@ def finish_transaction(instance: Transaction) -> Transaction:
         wallet.save(update_fields=['balance'])
 
     return instance
+
+
+def wallet_withdrawal(wallet: Wallet, withdrawal_amount):
+    if wallet.balance - withdrawal_amount < 0:
+        raise ValidationError("You do not have enough balance.")
+    wallet.balance -= withdrawal_amount
+    wallet.save(update_fields=['balance'])
