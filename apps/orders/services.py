@@ -8,7 +8,7 @@ from rest_framework.generics import get_object_or_404
 from apps.orders.models import OrderItem, ClientOrder
 from apps.shops.bundles.models import Bundle
 from apps.shops.products.models import Product
-from apps.utils.enums import ItemType, OrderItemStatus
+from apps.utils.enums import ItemType, OrderItemStatus, OrderStatus
 from apps.wallets.services import wallet_withdrawal
 
 
@@ -69,15 +69,22 @@ def create_order(user, data):
     return client_order
 
 
-def delete_order(pk):
+def cancel_order(pk):
     client_order = get_object_or_404(ClientOrder, pk=pk)
+    if client_order.deleted:
+        raise ValidationError("This order is already deleted.")
     client_order.order_items.all().update(deleted=True)
     client_order.deleted = True
+    wallet_withdrawal(client_order.client_user.wallet, -client_order.final_price)
     client_order.save(update_fields=['deleted'])
 
 
 def change_order_item_status(order_item, data):
     status = data.get('status')
+
+    if order_item.status == OrderItemStatus.CANCELLED:
+        raise ValidationError("This order item is already cancelled.")
+
     if status == OrderItemStatus.CANCELLED:
         client_user = order_item.client_order.client_user
         wallet_withdrawal(client_user.wallet, -order_item.final_price)
@@ -85,6 +92,17 @@ def change_order_item_status(order_item, data):
 
     order_item.save(update_fields=['status'])
     return order_item
+
+
+def change_order_status(order, data):
+    status = data.get('status')
+    if status == OrderStatus.CANCELLED:
+        client_user = order.client_user
+        wallet_withdrawal(client_user.wallet, -order.final_price)
+    order.status = status
+
+    order.save(update_fields=['status'])
+    return order
 
 
 def generate_unique_code_for_order_item(k=6):

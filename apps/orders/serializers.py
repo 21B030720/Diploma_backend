@@ -107,14 +107,18 @@ class OrderItemCreateSerializer(serializers.ModelSerializer):
 
 
 class ClientOrderSerializer(serializers.ModelSerializer):
-    client_user = ClientUserSerializer(read_only=True)
+    client_id = serializers.IntegerField(source='client_user.id')
+    client_name = serializers.CharField(source='client_user.name')
+    client_phone_number = serializers.CharField(source='client_user.phone_number')
 
     class Meta:
         model = ClientOrder
         fields = (
             'id',
             'idempotency',
-            'client_user',
+            'client_id',
+            'client_name',
+            'client_phone_number',
             'discount',
             'overall_price',
             'final_price',
@@ -122,20 +126,12 @@ class ClientOrderSerializer(serializers.ModelSerializer):
         )
 
 
-class ClientOrderDetailSerializer(serializers.ModelSerializer):
-    client_user = ClientUserSerializer(read_only=True)
+class ClientOrderDetailSerializer(ClientOrderSerializer):
     order_items = OrderItemForOrderSerializer(many=True, read_only=True)
 
     class Meta:
         model = ClientOrder
-        fields = (
-            'id',
-            'idempotency',
-            'client_user',
-            'discount',
-            'overall_price',
-            'final_price',
-            'status',
+        fields = ClientOrderSerializer.Meta.fields + (
             'order_items',
         )
 
@@ -148,4 +144,13 @@ class ClientOrderCreateSerializer(serializers.ModelSerializer):
         fields = (
             'order_items',
             'discount',
+        )
+
+
+class ChangeOrderStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ClientOrder
+        fields = (
+            'status'
         )
