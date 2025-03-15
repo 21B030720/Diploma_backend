@@ -69,16 +69,6 @@ def create_order(user, data):
     return client_order
 
 
-def cancel_order(pk):
-    client_order = get_object_or_404(ClientOrder, pk=pk)
-    if client_order.deleted:
-        raise ValidationError("This order is already deleted.")
-    client_order.order_items.all().update(deleted=True)
-    client_order.deleted = True
-    wallet_withdrawal(client_order.client_user.wallet, -client_order.final_price)
-    client_order.save(update_fields=['deleted'])
-
-
 def change_order_item_status(order_item, data):
     status = data.get('status')
 
@@ -96,6 +86,10 @@ def change_order_item_status(order_item, data):
 
 def change_order_status(order, data):
     status = data.get('status')
+
+    if order.status == OrderStatus.CANCELLED:
+        raise ValidationError("This order is already cancelled.")
+
     if status == OrderStatus.CANCELLED:
         client_user = order.client_user
         wallet_withdrawal(client_user.wallet, -order.final_price)
