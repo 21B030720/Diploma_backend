@@ -16,17 +16,20 @@ from apps.shops.products.serializers import ProductSerializer
 from apps.users.permissions import IsAdmin, IsManager, ReadOnly
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
+from apps.utils.swagger_params import shop_id_param, sort_param
 from apps.utils.views import BaseViewSet
 from config.parsers import DrfNestedParser
 
 
 # Create your views here.
-@method_decorator(
-    name='list',
-    decorator=swagger_auto_schema(
-        tags=['bundles']
-    )
-)
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['bundles'],
+                      manual_parameters=[
+                          shop_id_param,
+                          sort_param
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['bundles']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['bundles']))
 class BundleViewSet(BaseViewSet,
@@ -63,6 +66,10 @@ class BundleViewSet(BaseViewSet,
             elif user.crm_user.role == RoleType.MANAGER:
                 queryset = queryset.filter(shop_id=user.crm_user.shop_id)
 
+        shop_ids = self.request.query_params.getlist('shop_id', [])
+        if shop_ids:
+            queryset = queryset.filter(shop_id__in=shop_ids)
+
         return queryset
 
     def perform_create(self, serializer):
@@ -82,7 +89,7 @@ class BundleViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['bundles'],
                                                     request_body=BundleCreateSerializer,
                                                     responses={
-                                                        200: BundleSerializer(),
+                                                        201: BundleSerializer(),
                                                     }))
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -96,7 +103,7 @@ class BundleViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['bundles'],
                                                     request_body=BundleCreateSerializer,
                                                     responses={
-                                                        200: BundleSerializer(),
+                                                        201: BundleSerializer(),
                                                     }))
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

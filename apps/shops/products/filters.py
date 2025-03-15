@@ -1,11 +1,11 @@
 from django_filters import rest_framework as filters
+from rest_framework.exceptions import ValidationError
 
 from apps.shops.products.models import ProductCategory, Product
 
 
 class ProductCategoryFilterSet(filters.FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains')
-    shop_id = filters.BaseInFilter(field_name='shop_id', lookup_expr='in')
 
     class Meta:
         model = ProductCategory
@@ -15,11 +15,51 @@ class ProductCategoryFilterSet(filters.FilterSet):
 
 class ProductFilterSet(filters.FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains')
-    shop_id = filters.BaseInFilter(field_name='shop_id', lookup_expr='in')
-    category_name = filters.CharFilter(field_name='category__name', lookup_expr='icontains')
+    from_price = filters.NumberFilter(method='filter_by_price_range')
+    to_price = filters.NumberFilter(method='filter_by_price_range')
 
     class Meta:
         model = Product
         fields = {
             'category_id': ['exact'],
         }
+
+    def filter_by_price_range(self, queryset, name, value):
+        if name == 'from_price':
+            queryset = queryset.filter(price__gte=value)
+
+        if name == 'to_price':
+            queryset = queryset.filter(price__lte=value)
+
+        return queryset
+
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        search_from = self.data.get('from_age')
+        search_to = self.data.get('to_age')
+
+        if search_from and search_to:
+            try:
+                search_from = int(search_from)
+                search_to = int(search_to)
+            except ValueError:
+                raise ValidationError("Provide numeric value")
+
+            # record.from_age <= search_to AND record.to_age >= search_from
+            queryset = queryset.filter(from_age__lte=search_to, to_age__gte=search_from)
+
+        elif search_from:
+            try:
+                search_from = int(search_from)
+            except ValueError:
+                raise ValidationError("Provide numeric value")
+            queryset = queryset.filter(to_age__gte=search_from)
+
+        elif search_to:
+            try:
+                search_to = int(search_to)
+            except ValueError:
+                raise ValidationError("Provide numeric value")
+            queryset = queryset.filter(from_age__lte=search_to)
+
+        return queryset

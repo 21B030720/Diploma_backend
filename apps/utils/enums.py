@@ -58,3 +58,16 @@ class CoursePaymentPeriod(TextChoices):
     WEEKLY = 'weekly', 'weekly'
     DAILY = 'daily', 'daily'
     HOURLY = 'hourly', 'hourly'
+
+
+class ServiceType(TextChoices):
+    ONLINE = 'online', 'online'
+    OFFLINE = 'offline', 'offline'
+    HYBRID = 'hybrid', 'hybrid'
+
+
+class ServicePaymentPeriod(TextChoices):
+    MONTHLY = 'monthly', 'monthly'
+    WEEKLY = 'weekly', 'weekly'
+    DAILY = 'daily', 'daily'
+    HOURLY = 'hourly', 'hourly'

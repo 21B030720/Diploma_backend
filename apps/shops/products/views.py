@@ -17,17 +17,20 @@ from apps.shops.products.services import add_product_category, update_product_ca
 from apps.users.permissions import IsAdmin, IsManager, ReadOnly
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
+from apps.utils.swagger_params import shop_id_param, sort_param, category_name_param, from_age_param, to_age_param
 from apps.utils.views import BaseViewSet
 from config.parsers import DrfNestedParser
 
 
 # Create your views here.
-@method_decorator(
-    name='list',
-    decorator=swagger_auto_schema(
-        tags=['products-categories']
-    )
-)
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['products-categories'],
+                      manual_parameters=[
+                          shop_id_param,
+                          sort_param
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['products-categories']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['products-categories']))
 class ProductCategoryViewSet(BaseViewSet,
@@ -61,6 +64,10 @@ class ProductCategoryViewSet(BaseViewSet,
                 pass
             elif user.crm_user.role == RoleType.MANAGER:
                 queryset = queryset.filter(shop_id=user.crm_user.shop_id)
+
+        shop_ids = self.request.query_params.getlist('shop_id', [])
+        if shop_ids:
+            queryset = queryset.filter(shop_id__in=shop_ids)
 
         return queryset
 
@@ -122,12 +129,17 @@ class ProductCategoryViewSet(BaseViewSet,
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-@method_decorator(
-    name='list',
-    decorator=swagger_auto_schema(
-        tags=['products']
-    )
-)
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['products'],
+                      manual_parameters=[
+                          shop_id_param,
+                          sort_param,
+                          category_name_param,
+                          from_age_param,
+                          to_age_param
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['products']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['products']))
 class ProductViewSet(BaseViewSet,
@@ -162,6 +174,14 @@ class ProductViewSet(BaseViewSet,
             elif user.crm_user.role == RoleType.MANAGER:
                 queryset = queryset.filter(shop_id=user.crm_user.shop_id)
 
+        category_names = self.request.query_params.getlist('category_name', [])
+        if category_names:
+            queryset = queryset.filter(category__name__in=category_names)
+
+        shop_ids = self.request.query_params.getlist('shop_id', [])
+        if shop_ids:
+            queryset = queryset.filter(shop_id__in=shop_ids)
+
         return queryset
 
     def perform_create(self, serializer):
@@ -181,7 +201,7 @@ class ProductViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['products'],
                                                     request_body=ProductCreateSerializer,
                                                     responses={
-                                                        200: ProductSerializer(),
+                                                        201: ProductSerializer(),
                                                     }))
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -195,7 +215,7 @@ class ProductViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['products'],
                                                     request_body=ProductCreateSerializer,
                                                     responses={
-                                                        200: ProductSerializer(),
+                                                        201: ProductSerializer(),
                                                     }))
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

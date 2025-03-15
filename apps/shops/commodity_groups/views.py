@@ -18,17 +18,20 @@ from apps.shops.products.serializers import ProductSerializer
 from apps.users.permissions import IsAdmin, IsManager, ReadOnly
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
+from apps.utils.swagger_params import shop_id_param, sort_param, category_name_param
 from apps.utils.views import BaseViewSet
 from config.parsers import DrfNestedParser
 
 
 # Create your views here.
-@method_decorator(
-    name='list',
-    decorator=swagger_auto_schema(
-        tags=['commodity-groups-categories']
-    )
-)
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['commodity-groups-categories'],
+                      manual_parameters=[
+                          shop_id_param,
+                          sort_param,
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['commodity-groups-categories']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['commodity-groups-categories']))
 class CommodityGroupCategoryViewSet(BaseViewSet,
@@ -63,6 +66,10 @@ class CommodityGroupCategoryViewSet(BaseViewSet,
             elif user.crm_user.role == RoleType.MANAGER:
                 queryset = queryset.filter(shop_id=user.crm_user.shop_id)
 
+        shop_ids = self.request.query_params.getlist('shop_id', [])
+        if shop_ids:
+            queryset = queryset.filter(shop_id__in=shop_ids)
+
         return queryset
 
     def perform_create(self, serializer):
@@ -82,7 +89,7 @@ class CommodityGroupCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['commodity-groups-categories'],
                                                     request_body=CommodityGroupCategoryCreateSerializer,
                                                     responses={
-                                                        200: CommodityGroupCategorySerializer(),
+                                                        201: CommodityGroupCategorySerializer(),
                                                     }))
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -96,7 +103,7 @@ class CommodityGroupCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['commodity-groups-categories'],
                                                     request_body=CommodityGroupCategoryCreateSerializer,
                                                     responses={
-                                                        200: CommodityGroupCategorySerializer(),
+                                                        201: CommodityGroupCategorySerializer(),
                                                     }))
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -124,12 +131,15 @@ class CommodityGroupCategoryViewSet(BaseViewSet,
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-@method_decorator(
-    name='list',
-    decorator=swagger_auto_schema(
-        tags=['commodity-groups']
-    )
-)
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['commodity-groups'],
+                      manual_parameters=[
+                          shop_id_param,
+                          sort_param,
+                          category_name_param
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['commodity-groups']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['commodity-groups']))
 class CommodityGroupViewSet(BaseViewSet,
@@ -164,6 +174,14 @@ class CommodityGroupViewSet(BaseViewSet,
             elif user.crm_user.role == RoleType.MANAGER:
                 queryset = queryset.filter(shop_id=user.crm_user.shop_id)
 
+        category_names = self.request.query_params.getlist('category_name', [])
+        if category_names:
+            queryset = queryset.filter(category__name__in=category_names)
+
+        shop_ids = self.request.query_params.getlist('shop_id', [])
+        if shop_ids:
+            queryset = queryset.filter(shop_id__in=shop_ids)
+
         return queryset
 
     def perform_create(self, serializer):
@@ -183,7 +201,7 @@ class CommodityGroupViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['commodity-groups'],
                                                     request_body=CommodityGroupCreateSerializer,
                                                     responses={
-                                                        200: CommodityGroupSerializer(),
+                                                        201: CommodityGroupSerializer(),
                                                     }))
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -197,7 +215,7 @@ class CommodityGroupViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['commodity-groups'],
                                                     request_body=CommodityGroupCreateSerializer,
                                                     responses={
-                                                        200: CommodityGroupSerializer(),
+                                                        201: CommodityGroupSerializer(),
                                                     }))
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

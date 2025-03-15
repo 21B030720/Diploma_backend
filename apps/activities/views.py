@@ -8,6 +8,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.activities.filters import EventCategoryFilterSet, EventFilterSet, CourseCategoryFilterSet, CourseFilterSet
 from apps.activities.models import EventCategory, Event, CourseCategory, Course
 from apps.activities.serializers import EventCategorySerializer, EventCategoryCreateSerializer, EventSerializer, \
     EventCreateSerializer, CourseCategorySerializer, CourseCategoryCreateSerializer, CourseSerializer, \
@@ -15,7 +16,9 @@ from apps.activities.serializers import EventCategorySerializer, EventCategoryCr
 from apps.activities.services import delete_event_category, add_event_category, update_event_category, add_event, \
     update_event, delete_event, add_course_category, update_course_category, delete_course_category, add_course, \
     update_course, delete_course
+from apps.users.permissions import IsAdmin, ReadOnly
 from apps.utils.filters import SortingFilterBackend
+from apps.utils.swagger_params import from_age_param, to_age_param
 from apps.utils.views import BaseViewSet
 from config.parsers import DrfNestedParser
 
@@ -31,12 +34,17 @@ class EventCategoryViewSet(BaseViewSet,
                            mixins.UpdateModelMixin,
                            mixins.DestroyModelMixin,
                            GenericViewSet):
+    queryset = EventCategory.objects.all()
     serializer_class = EventCategorySerializer
     serializers = {
         'create': EventCategoryCreateSerializer,
         'update': EventCategoryCreateSerializer
     }
-    queryset = EventCategory.objects.all()
+    filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = EventCategoryFilterSet
+    sorting_fields = {
+    }
+    permission_classes = [IsAdmin | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -60,7 +68,7 @@ class EventCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['event-categories'],
                           responses={
-                              200: EventCategorySerializer()
+                              201: EventCategorySerializer()
                           }
                       ))
     def create(self, request, *args, **kwargs):
@@ -75,7 +83,7 @@ class EventCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['event-categories'],
                           responses={
-                              200: EventCategorySerializer()
+                              201: EventCategorySerializer()
                           }
                       ))
     def update(self, request, *args, **kwargs):
@@ -100,7 +108,14 @@ class EventCategoryViewSet(BaseViewSet,
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-@method_decorator(name='list', decorator=swagger_auto_schema(tags=['events']))
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      tags=['events'],
+                      manual_parameters=[
+                          from_age_param,
+                          to_age_param
+                      ]
+                  ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['events']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['events']))
 class EventViewSet(BaseViewSet,
@@ -110,18 +125,18 @@ class EventViewSet(BaseViewSet,
                    mixins.UpdateModelMixin,
                    mixins.DestroyModelMixin,
                    GenericViewSet):
+    queryset = Event.objects.all()
     serializer_class = EventSerializer
     serializers = {
         'create': EventCreateSerializer,
         'update': EventCreateSerializer
     }
-    queryset = Event.objects.all()
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = EventFilterSet
     sorting_fields = {
-
     }
-
     parser_classes = (DrfNestedParser, )
+    permission_classes = [IsAdmin | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -145,7 +160,7 @@ class EventViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['events'],
                           responses={
-                              200: EventSerializer()
+                              201: EventSerializer()
                           }
                       ))
     def create(self, request, *args, **kwargs):
@@ -160,7 +175,7 @@ class EventViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['events'],
                           responses={
-                              200: EventSerializer()
+                              201: EventSerializer()
                           }
                       ))
     def update(self, request, *args, **kwargs):
@@ -195,12 +210,17 @@ class CourseCategoryViewSet(BaseViewSet,
                             mixins.UpdateModelMixin,
                             mixins.DestroyModelMixin,
                             GenericViewSet):
+    queryset = CourseCategory.objects.all()
     serializer_class = CourseCategorySerializer
     serializers = {
         'create': CourseCategoryCreateSerializer,
         'update': CourseCategoryCreateSerializer
     }
-    queryset = CourseCategory.objects.all()
+    filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = CourseCategoryFilterSet
+    sorting_fields = {
+    }
+    permission_classes = [IsAdmin | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -224,7 +244,7 @@ class CourseCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['course-categories'],
                           responses={
-                              200: CourseCategorySerializer()
+                              201: CourseCategorySerializer()
                           }
                       ))
     def create(self, request, *args, **kwargs):
@@ -239,7 +259,7 @@ class CourseCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['course-categories'],
                           responses={
-                              200: CourseCategorySerializer()
+                              201: CourseCategorySerializer()
                           }
                       ))
     def update(self, request, *args, **kwargs):
@@ -274,17 +294,18 @@ class CourseViewSet(BaseViewSet,
                     mixins.UpdateModelMixin,
                     mixins.DestroyModelMixin,
                     GenericViewSet):
+    queryset = Course.objects.all()
     serializer_class = CourseSerializer
     serializers = {
         'create': CourseCreateSerializer,
         'update': CourseCreateSerializer
     }
-    queryset = Course.objects.all()
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = CourseFilterSet
     sorting_fields = {
     }
-
     parser_classes = (DrfNestedParser, JSONParser)
+    permission_classes = [IsAdmin | ReadOnly]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -308,7 +329,7 @@ class CourseViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['courses'],
                           responses={
-                              200: CourseSerializer()
+                              201: CourseSerializer()
                           }
                       ))
     def create(self, request, *args, **kwargs):
@@ -323,7 +344,7 @@ class CourseViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['courses'],
                           responses={
-                              200: CourseSerializer()
+                              201: CourseSerializer()
                           }
                       ))
     def update(self, request, *args, **kwargs):
