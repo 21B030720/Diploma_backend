@@ -47,12 +47,15 @@ class ClientOrderViewSet(BaseViewSet,
         '-created_at'
     )
     serializer_class = ClientOrderSerializer
-    parser_classes = (JSONParser, )
     serializers = {
         'create': ClientOrderCreateSerializer,
         'retrieve': ClientOrderDetailSerializer,
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    sorting_fields = {
+
+    }
+    parser_classes = (JSONParser,)
     permission_classes = [IsClientUser | IsAdmin]
 
     def get_queryset(self):
@@ -115,12 +118,12 @@ class OrderItemViewSet(BaseViewSet,
         'change_status': ChangeOrderItemStatusSerializer
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
-
     sorting_fields = {
         'client_name': 'client_order__client_user__name',
         'client_phone_number': 'client_order__client_user__phone_number',
         'shop_name': 'shop__name',
     }
+    parser_classes = (JSONParser,)
     permission_classes = [IsAdmin | IsManager]
 
     def get_queryset(self):
