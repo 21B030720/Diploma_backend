@@ -65,6 +65,7 @@ CUSTOM_APPS = [
     'apps.shops.commodity_groups.apps.CommodityGroupsConfig',
     'apps.shops.bundles.apps.BundlesConfig',
     'apps.activities.apps.ActivitiesConfig',
+    'apps.services.apps.ServicesConfig',
     'apps.wallets.apps.WalletsConfig',
     'apps.paybox.apps.PayboxConfig',
     'apps.send_pulse.apps.SendPulseConfig',

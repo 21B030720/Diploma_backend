@@ -41,6 +41,7 @@ urlpatterns = [
     path('users/', include('apps.users.urls')),
     path('shops/', include('apps.shops.urls')),
     path('activities/', include('apps.activities.urls')),
+    path('services/', include('apps.services.urls')),
     path('wallets/', include('apps.wallets.urls')),
     path('paybox/', include('apps.paybox.urls')),
     path('emails/', include('apps.send_pulse.urls')),

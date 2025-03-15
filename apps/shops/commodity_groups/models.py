@@ -17,13 +17,13 @@ def upload_commodity_group_image(instance, filename):
 # Create your models here.
 class CommodityGroupCategory(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=255)
-    icon = models.ImageField(upload_to=upload_commodity_group_category_icon)
+    icon = models.ImageField(upload_to=upload_commodity_group_category_icon, null=True, blank=True)
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='commodity_group_categories')
 
 
 class CommodityGroup(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=255)
-    image = models.ImageField(upload_to=upload_commodity_group_image)
+    image = models.ImageField(upload_to=upload_commodity_group_image, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(CommodityGroupCategory, on_delete=models.CASCADE, related_name='commodity_groups')
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='commodity_groups')
