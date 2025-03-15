@@ -33,3 +33,13 @@ class BundleSerializer(serializers.ModelSerializer):
             'discount',
             'price'
         )
+
+
+class BundleDetailSerializer(BundleSerializer):
+    products = ProductSimpleSerializer(many=True)
+
+    class Meta:
+        model = Bundle
+        fields = BundleSerializer.Meta.fields + (
+            'products',
+        )
