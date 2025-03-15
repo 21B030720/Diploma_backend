@@ -2,12 +2,13 @@ import random
 import string
 
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
 from apps.orders.models import OrderItem, ClientOrder
 from apps.shops.bundles.models import Bundle
 from apps.shops.products.models import Product
-from apps.utils.enums import ItemType
+from apps.utils.enums import ItemType, OrderItemStatus
 from apps.wallets.services import wallet_withdrawal
 
 
@@ -75,9 +76,21 @@ def delete_order(pk):
     client_order.save(update_fields=['deleted'])
 
 
+def change_order_item_status(order_item, data):
+    status = data.get('status')
+    if status == OrderItemStatus.CANCELLED:
+        client_user = order_item.client_order.client_user
+        wallet_withdrawal(client_user.wallet, -order_item.final_price)
+    order_item.status = status
+
+    order_item.save(update_fields=['status'])
+    return order_item
+
 
 def generate_unique_code_for_order_item(k=6):
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))
         if not OrderItem.objects.filter(code=code).exists():
             return code
+
+

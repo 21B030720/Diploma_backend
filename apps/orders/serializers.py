@@ -10,6 +10,48 @@ from apps.users.serializers import ClientUserSerializer
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    client_name = serializers.CharField(source='client_order.client_user.name')
+    client_phone_number = serializers.CharField(source='client_order.client_user.phone_number')
+    shop_name = serializers.CharField(source='shop.name')
+
+    class Meta:
+        model = OrderItem
+        fields = (
+            'id',
+            'code',
+            'client_name',
+            'client_phone_number',
+            'shop_id',
+            'shop_name',
+            'item_type',
+            'discount',
+            'final_price',
+            'status'
+        )
+
+
+class OrderItemDetailSerializer(OrderItemSerializer):
+    product = ProductSerializer()
+    bundle = BundleDetailSerializer()
+
+    class Meta:
+        model = OrderItem
+        fields = OrderItemSerializer.Meta.fields + (
+            'product',
+            'bundle'
+        )
+
+
+class ChangeOrderItemStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OrderItem
+        fields = (
+            'status',
+        )
+
+
+class OrderItemForOrderSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     bundle = serializers.SerializerMethodField()
     shop_name = serializers.CharField(source='shop.name')
@@ -82,7 +124,7 @@ class ClientOrderSerializer(serializers.ModelSerializer):
 
 class ClientOrderDetailSerializer(serializers.ModelSerializer):
     client_user = ClientUserSerializer(read_only=True)
-    order_items = OrderItemSerializer(many=True, read_only=True)
+    order_items = OrderItemForOrderSerializer(many=True, read_only=True)
 
     class Meta:
         model = ClientOrder
