@@ -5,6 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -251,8 +252,11 @@ class ServiceViewSet(BaseViewSet,
                               200: ObjectRatingSerializer()
                           }
                       ))
-    @action(methods=['GET'], detail=True, url_path='my-review', permission_classes=[IsClientUser])
+    @action(methods=['GET'], detail=True, url_path='my-review')
     def my_review(self, request, *args, **kwargs):
+        user = self.request.user
+        if not user.is_authenticated:
+            raise ValidationError('You must be logged in to see your review.')
         obj = self.get_object()
         service_provider = obj.service_provider
         review = service_provider.ratings.filter(user=self.request.user).first()

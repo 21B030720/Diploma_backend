@@ -187,8 +187,11 @@ class BundleViewSet(BaseViewSet,
                               200: ObjectRatingSerializer()
                           }
                       ))
-    @action(methods=['GET'], detail=True, url_path='my-review', permission_classes=[IsClientUser])
+    @action(methods=['GET'], detail=True, url_path='my-review')
     def my_review(self, request, *args, **kwargs):
+        user = self.request.user
+        if not user.is_authenticated:
+            raise ValidationError('You must be logged in to see your review.')
         obj = self.get_object()
         review = obj.ratings.filter(user=self.request.user).first()
         serializer = ObjectRatingSerializer(review)
