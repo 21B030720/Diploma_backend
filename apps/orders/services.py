@@ -100,12 +100,13 @@ def change_order_status(order: ClientOrder, status):
         raise ValidationError("This order is cancelled.")
 
     if status == OrderStatus.CANCELLED:
-        order_items = order.order_items.all()
+        order_items = order.order_items.exclude(status=OrderItemStatus.GIVEN_TO_CUSTOMER)
         for order_item in order_items:
             change_order_item_status(order_item, OrderItemStatus.CANCELLED)
     order.status = status
 
     order.save(update_fields=['status'])
+    update_order_status(order)
     return order
 
 
@@ -117,17 +118,12 @@ def generate_unique_code_for_order_item(k=6):
 
 
 def update_order_status(order):
-    if order.status == OrderStatus.CANCELLED:
-        raise ValidationError("This order is already cancelled.")
-
     order_items = order.order_items.all()
     statuses = {item.status for item in order_items}
 
     if statuses == {OrderItemStatus.GIVEN_TO_CUSTOMER}:
         order.status = OrderStatus.TOTALLY_GIVEN
-    elif statuses == {OrderItemStatus.WAITING_FOR_COURIER}:
-        order.status = OrderStatus.WAITING
-    elif OrderItemStatus.GIVEN_TO_CUSTOMER in statuses:
+    elif statuses == {OrderItemStatus.GIVEN_TO_CUSTOMER, OrderItemStatus.CANCELLED}:
         order.status = OrderStatus.PARTIALLY_GIVEN
     else:
         order.status = OrderStatus.WAITING
