@@ -9,14 +9,15 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.reviews.serializers import RateSerializer, ObjectRatingSerializer
 from apps.shops.filters import ShopFilterSet, CityFilterSet, CountryFilterSet
 from apps.shops.models import Shop, City, Country
 from apps.shops.serializers import ShopSerializer, ShopCreateSerializer, ShopSimpleSerializer, CitySerializer, \
     CityCreateSerializer, CitySimpleSerializer, CountrySerializer, CountryCreateSerializer
 from apps.shops.services import add_shop, add_city, update_city, delete_city, add_country, update_country, \
-    delete_country, delete_shop, update_shop
+    delete_country, delete_shop, update_shop, rate_shop
 from apps.users.models import CRMUser
-from apps.users.permissions import IsAdmin, IsManager, ReadOnly
+from apps.users.permissions import IsAdmin, IsManager, ReadOnly, IsClientUser
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.serializers import EmptySerializer
@@ -216,7 +217,8 @@ class ShopViewSet(BaseViewSet,
     serializers = {
         'create': ShopCreateSerializer,
         'update': ShopCreateSerializer,
-        'all': ShopSimpleSerializer
+        'all': ShopSimpleSerializer,
+        'rate_shop': RateSerializer
     }
     permission_classes = [IsAdmin | IsManager | ReadOnly]
 
@@ -226,6 +228,13 @@ class ShopViewSet(BaseViewSet,
     sorting_fields = {
         'city_name': 'city__name'
     }
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        user = self.request.user
+        if user.is_authenticated:
+            context['user'] = user
+        return context
 
     def get_queryset(self):
         user = self.request.user
@@ -305,3 +314,55 @@ class ShopViewSet(BaseViewSet,
         items = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(items, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='rate_shop',
+                      decorator=swagger_auto_schema(
+                          tags=['shops'],
+                          responses={
+                              201: ShopSerializer()
+                          }
+                      ))
+    @action(methods=['POST'], detail=True, url_path='rate-shop', permission_classes=[IsClientUser], parser_classes=(JSONParser, ))
+    def rate_shop(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = self.get_object()
+        user = self.request.user
+        service_provider = rate_shop(obj, user, serializer.validated_data)
+        serializer = ShopSerializer(service_provider, context=self.get_serializer_context())
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @method_decorator(name='shop_reviews',
+                      decorator=swagger_auto_schema(
+                          tags=['shops'],
+                          responses={
+                              200: ObjectRatingSerializer(many=True)
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='shop-reviews')
+    def shop_reviews(self, request, *args, **kwargs):
+        obj = self.get_object()
+        reviews = obj.ratings.filter(
+            review__isnull=False
+        )
+        if self.request.user.is_authenticated:
+            reviews = reviews.exclude(
+                user=self.request.user
+            )
+        reviews = reviews.order_by('-changed_at')
+        serializer = ObjectRatingSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='my_review',
+                      decorator=swagger_auto_schema(
+                          tags=['shops'],
+                          responses={
+                              200: ObjectRatingSerializer()
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='my-review', permission_classes=[IsClientUser])
+    def my_review(self, request, *args, **kwargs):
+        obj = self.get_object()
+        review = obj.ratings.filter(user=self.request.user).first()
+        serializer = ObjectRatingSerializer(review)
+        return Response(serializer.data, status=status.HTTP_200_OK)

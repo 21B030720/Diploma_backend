@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
-from apps.services.models import ServiceCategory, ServiceProvider, Service, ServiceProviderRating
+from apps.reviews.models import ObjectRating
+from apps.services.models import ServiceCategory, ServiceProvider, Service
 
 
 def add_service_category(data):
@@ -59,12 +60,12 @@ def rate_service_provider(service, user, data):
     if not service_provider:
         raise ValidationError("This service does not have a provider.")
 
-    is_already_rated = ServiceProviderRating.objects.filter(user=user, service_provider=service_provider).exists()
+    is_already_rated = ObjectRating.objects.filter(user=user, service_provider=service_provider).exists()
     if is_already_rated:
-        ServiceProviderRating.objects.filter(user=user, service_provider=service_provider).update(**data)
+        ObjectRating.objects.filter(user=user, service_provider=service_provider).update(**data)
     else:
-        ServiceProviderRating.objects.create(service_provider=service_provider,
-                                             user=user,
-                                             **data)
+        ObjectRating.objects.create(service_provider=service_provider,
+                                    user=user,
+                                    **data)
 
     return service_provider

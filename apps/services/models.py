@@ -49,12 +49,6 @@ class ServiceProvider(DeletedMixin, TimestampMixin):
         return rating_count
 
 
-class ServiceProviderRating(DeletedMixin, TimestampMixin):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    service_provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE, related_name='ratings')
-    rating = models.PositiveSmallIntegerField()
-
-
 class Service(DeletedMixin, TimestampMixin):
     title = models.CharField(max_length=255)
     service_provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE, related_name='services')

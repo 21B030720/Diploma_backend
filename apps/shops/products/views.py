@@ -8,13 +8,14 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.reviews.serializers import ObjectRatingSerializer, RateSerializer
 from apps.shops.products.filters import ProductCategoryFilterSet, ProductFilterSet
 from apps.shops.products.models import ProductCategory, Product
 from apps.shops.products.serializers import ProductCategorySerializer, ProductCategoryCreateSerializer, \
     ProductCategorySimpleSerializer, ProductSerializer, ProductSimpleSerializer, ProductCreateSerializer
 from apps.shops.products.services import add_product_category, update_product_category, delete_product_category, \
-    add_product, delete_product, update_product
-from apps.users.permissions import IsAdmin, IsManager, ReadOnly
+    add_product, delete_product, update_product, rate_product
+from apps.users.permissions import IsAdmin, IsManager, ReadOnly, IsClientUser
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.swagger_params import shop_id_param, sort_param, category_name_param, from_age_param, to_age_param
@@ -158,11 +159,19 @@ class ProductViewSet(BaseViewSet,
     serializers = {
         'create': ProductCreateSerializer,
         'update': ProductCreateSerializer,
-        'all': ProductSimpleSerializer
+        'all': ProductSimpleSerializer,
+        'rate_product': RateSerializer
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = ProductFilterSet
     permission_classes = [IsAdmin | IsManager | ReadOnly]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        user = self.request.user
+        if user.is_authenticated:
+            context['user'] = user
+        return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -240,3 +249,55 @@ class ProductViewSet(BaseViewSet,
         items = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(items, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='rate_product',
+                      decorator=swagger_auto_schema(
+                          tags=['products'],
+                          responses={
+                              201: ProductSerializer()
+                          }
+                      ))
+    @action(methods=['POST'], detail=True, url_path='rate-product', permission_classes=[IsClientUser], parser_classes=(JSONParser, ))
+    def rate_product(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = self.get_object()
+        user = self.request.user
+        service_provider = rate_product(obj, user, serializer.validated_data)
+        serializer = ProductSerializer(service_provider, context=self.get_serializer_context())
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @method_decorator(name='product_reviews',
+                      decorator=swagger_auto_schema(
+                          tags=['products'],
+                          responses={
+                              200: ObjectRatingSerializer(many=True)
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='product-reviews')
+    def product_reviews(self, request, *args, **kwargs):
+        obj = self.get_object()
+        reviews = obj.ratings.filter(
+            review__isnull=False
+        )
+        if self.request.user.is_authenticated:
+            reviews = reviews.exclude(
+                user=self.request.user
+            )
+        reviews = reviews.order_by('-changed_at')
+        serializer = ObjectRatingSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='my_review',
+                      decorator=swagger_auto_schema(
+                          tags=['products'],
+                          responses={
+                              200: ObjectRatingSerializer()
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='my-review', permission_classes=[IsClientUser])
+    def my_review(self, request, *args, **kwargs):
+        obj = self.get_object()
+        review = obj.ratings.filter(user=self.request.user).first()
+        serializer = ObjectRatingSerializer(review)
+        return Response(serializer.data, status=status.HTTP_200_OK)

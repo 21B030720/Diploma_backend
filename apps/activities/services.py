@@ -2,6 +2,7 @@ from django.db import transaction
 from rest_framework.generics import get_object_or_404
 
 from apps.activities.models import EventCategory, Event, CourseCategory, Course, CoursePriceList
+from apps.reviews.models import ObjectRating
 
 
 def add_event_category(data):
@@ -124,3 +125,27 @@ def delete_course(pk):
     course.course_prices.update(deleted=True)
     course.deleted = True
     course.save(update_fields=['deleted'])
+
+
+def rate_event(event, user, data):
+    is_already_rated = ObjectRating.objects.filter(user=user, event=event).exists()
+    if is_already_rated:
+        ObjectRating.objects.filter(user=user, event=event).update(**data)
+    else:
+        ObjectRating.objects.create(event=event,
+                                    user=user,
+                                    **data)
+
+    return event
+
+
+def rate_course(course, user, data):
+    is_already_rated = ObjectRating.objects.filter(user=user, course=course).exists()
+    if is_already_rated:
+        ObjectRating.objects.filter(user=user, course=course).update(**data)
+    else:
+        ObjectRating.objects.create(course=course,
+                                    user=user,
+                                    **data)
+
+    return course

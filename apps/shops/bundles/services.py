@@ -1,6 +1,7 @@
 from django.db.models import Sum
 from rest_framework.generics import get_object_or_404
 
+from apps.reviews.models import ObjectRating
 from apps.shops.bundles.models import Bundle
 
 
@@ -37,3 +38,15 @@ def delete_bundle(pk):
     bundle = get_object_or_404(Bundle, pk=pk)
     bundle.deleted = True
     bundle.save(update_fields=['deleted'])
+
+
+def rate_bundle(bundle, user, data):
+    is_already_rated = ObjectRating.objects.filter(user=user, bundle=bundle).exists()
+    if is_already_rated:
+        ObjectRating.objects.filter(user=user, bundle=bundle).update(**data)
+    else:
+        ObjectRating.objects.create(bundle=bundle,
+                                    user=user,
+                                    **data)
+
+    return bundle

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.reviews.models import ObjectRating
 from apps.shops.models import Shop, City, Country
 
 
@@ -55,12 +56,16 @@ class CityCreateSerializer(serializers.ModelSerializer):
 class ShopSerializer(serializers.ModelSerializer):
     # image = serializers.SerializerMethodField()
     city_name = serializers.CharField(source='city.name')
+    rating_from_user = serializers.SerializerMethodField()
 
     class Meta:
         model = Shop
         fields = (
             'id',
             'image',
+            'avg_rating',
+            'rating_from_user',
+            'rating_count',
             'name',
             'address',
             'blocked',
@@ -75,8 +80,17 @@ class ShopSerializer(serializers.ModelSerializer):
             'two_gis_link',
         )
 
-    # def get_image(self, obj):
-    #     return obj.image.url if obj.image else None
+    @property
+    def current_user(self):
+        user = self.context.get('user', None)
+        return user
+
+    def get_rating_from_user(self, obj):
+        if self.current_user:
+            shop_rating = ObjectRating.objects.filter(user=self.current_user,
+                                                                  shop=obj).first()
+            return shop_rating.rating if shop_rating else None
+        return None
 
 
 class ShopSimpleSerializer(serializers.ModelSerializer):

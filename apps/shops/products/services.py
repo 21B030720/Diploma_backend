@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework.generics import get_object_or_404
 
+from apps.reviews.models import ObjectRating
 from apps.shops.products.models import Product, ProductCategory, ProductNutritionCharacteristics
 
 
@@ -63,3 +64,15 @@ def delete_product(pk):
     product = get_object_or_404(Product, pk=pk)
     product.deleted = True
     product.save(update_fields=['deleted'])
+
+
+def rate_product(product, user, data):
+    is_already_rated = ObjectRating.objects.filter(user=user, product=product).exists()
+    if is_already_rated:
+        ObjectRating.objects.filter(user=user, product=product).update(**data)
+    else:
+        ObjectRating.objects.create(product=product,
+                                    user=user,
+                                    **data)
+
+    return product
