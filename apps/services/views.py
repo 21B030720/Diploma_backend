@@ -9,10 +9,11 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.reviews.serializers import RateSerializer, ObjectRatingSerializer
 from apps.services.filters import ServiceCategoryFilterSet, ServiceFilterSet
 from apps.services.models import ServiceCategory, Service
 from apps.services.serializers import ServiceCategorySerializer, ServiceCategoryCreateSerializer, ServiceSerializer, \
-    ServiceCreateSerializer, RateProviderSerializer, ServiceProviderSerializer
+    ServiceCreateSerializer, ServiceProviderSerializer
 from apps.services.services import add_service_category, update_service_category, delete_service_category, add_service, \
     update_service, delete_service, rate_service_provider
 from apps.users.permissions import IsClientUser, IsAdmin, ReadOnly
@@ -122,7 +123,7 @@ class ServiceViewSet(BaseViewSet,
     serializers = {
         'create': ServiceCreateSerializer,
         'update': ServiceCreateSerializer,
-        'rate_provider': RateProviderSerializer
+        'rate_provider': RateSerializer
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = ServiceFilterSet
@@ -218,5 +219,39 @@ class ServiceViewSet(BaseViewSet,
         obj = self.get_object()
         user = self.request.user
         service_provider = rate_service_provider(obj, user, serializer.validated_data)
-        serializer = ServiceProviderSerializer(service_provider)
+        serializer = ServiceProviderSerializer(service_provider, context=self.get_serializer_context())
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @method_decorator(name='provider_reviews',
+                      decorator=swagger_auto_schema(
+                          tags=['service'],
+                          responses={
+                              200: ObjectRatingSerializer(many=True)
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='provider-reviews')
+    def provider_reviews(self, request, *args, **kwargs):
+        obj = self.get_object()
+        service_provider = obj.service_provider
+        reviews = service_provider.ratings.filter(
+            review__isnull=False
+        ).exclude(
+            user=self.request.user
+        ).order_by('-changed_at')
+        serializer = ObjectRatingSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='my_review',
+                      decorator=swagger_auto_schema(
+                          tags=['service'],
+                          responses={
+                              200: ObjectRatingSerializer()
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='my-review', permission_classes=[IsClientUser])
+    def my_review(self, request, *args, **kwargs):
+        obj = self.get_object()
+        service_provider = obj.service_provider
+        review = service_provider.ratings.filter(user=self.request.user).first()
+        serializer = ObjectRatingSerializer(review)
+        return Response(serializer.data, status=status.HTTP_200_OK)

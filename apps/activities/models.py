@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 from phonenumber_field.modelfields import PhoneNumberField
 
 from apps.utils.enums import CoursePaymentPeriod
@@ -37,6 +38,16 @@ class Event(DeletedMixin, TimestampMixin):
     from_age = models.PositiveIntegerField(null=True, blank=True)
     to_age = models.PositiveIntegerField(null=True, blank=True)
 
+    @property
+    def avg_rating(self):
+        avg_rating = self.ratings.aggregate(avg_rating=Avg('rating'))
+        return avg_rating['avg_rating']
+
+    @property
+    def rating_count(self):
+        rating_count = self.ratings.count()
+        return rating_count
+
 
 class CourseCategory(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=255)
@@ -55,6 +66,16 @@ class Course(DeletedMixin, TimestampMixin):
     two_gis_link = models.URLField(null=True, blank=True)
     from_age = models.PositiveIntegerField(null=True, blank=True)
     to_age = models.PositiveIntegerField(null=True, blank=True)
+
+    @property
+    def avg_rating(self):
+        avg_rating = self.ratings.aggregate(avg_rating=Avg('rating'))
+        return avg_rating['avg_rating']
+
+    @property
+    def rating_count(self):
+        rating_count = self.ratings.count()
+        return rating_count
 
 
 class CoursePriceList(DeletedMixin, TimestampMixin):

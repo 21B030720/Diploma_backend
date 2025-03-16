@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 
 from apps.shops.commodity_groups.models import CommodityGroup
 from apps.shops.models import Shop
@@ -45,3 +46,13 @@ class Product(DeletedMixin, TimestampMixin):
     measure = models.CharField(choices=Measures.choices, max_length=100)
     shop = models.ForeignKey(Shop, related_name='products', on_delete=models.CASCADE)
     commodity_group = models.ForeignKey(CommodityGroup, on_delete=models.SET_NULL, related_name='products', null=True, blank=True)
+
+    @property
+    def avg_rating(self):
+        avg_rating = self.ratings.aggregate(avg_rating=Avg('rating'))
+        return avg_rating['avg_rating']
+
+    @property
+    def rating_count(self):
+        rating_count = self.ratings.count()
+        return rating_count

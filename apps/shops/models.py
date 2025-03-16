@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 
 from apps.utils.enums import TimeZones
 from apps.utils.models import DeletedMixin, TimestampMixin
@@ -37,3 +38,13 @@ class Shop(DeletedMixin, TimestampMixin):
 
     def __str__(self):
         return f"Заведение: {self.name}"
+
+    @property
+    def avg_rating(self):
+        avg_rating = self.ratings.aggregate(avg_rating=Avg('rating'))
+        return avg_rating['avg_rating']
+
+    @property
+    def rating_count(self):
+        rating_count = self.ratings.count()
+        return rating_count

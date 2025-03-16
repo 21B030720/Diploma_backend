@@ -1,5 +1,6 @@
 from rest_framework.generics import get_object_or_404
 
+from apps.reviews.models import ObjectRating
 from apps.shops.models import Shop, City, Country
 
 
@@ -61,4 +62,16 @@ def update_shop(pk, data):
 def delete_shop(pk):
     shop = get_object_or_404(Shop, pk=pk)
     shop.deleted = True
-    shop.save()
+    shop.save(update_fields=['deleted'])
+
+
+def rate_shop(shop, user, data):
+    is_already_rated = ObjectRating.objects.filter(user=user, shop=shop).exists()
+    if is_already_rated:
+        ObjectRating.objects.filter(user=user, shop=shop).update(**data)
+    else:
+        ObjectRating.objects.create(shop=shop,
+                                    user=user,
+                                    **data)
+
+    return shop

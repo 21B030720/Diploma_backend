@@ -1,7 +1,8 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
-from apps.services.models import ServiceCategory, Service, ServiceProvider, ServiceProviderRating
+from apps.reviews.models import ObjectRating
+from apps.services.models import ServiceCategory, Service, ServiceProvider
 
 
 class ServiceCategorySerializer(serializers.ModelSerializer):
@@ -53,8 +54,8 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
 
     def get_rating_from_user(self, obj):
         if self.current_user:
-            service_provider_rating = ServiceProviderRating.objects.filter(user=self.current_user,
-                                                          service_provider=obj).first()
+            service_provider_rating = ObjectRating.objects.filter(user=self.current_user,
+                                                                  service_provider=obj).first()
             return service_provider_rating.rating if service_provider_rating else None
         return None
 
@@ -73,16 +74,6 @@ class ServiceProviderCreateSerializer(serializers.ModelSerializer):
             'social_networks',
             'resume',
             'is_active'
-        )
-
-
-class RateProviderSerializer(serializers.ModelSerializer):
-    rating = serializers.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
-
-    class Meta:
-        model = ServiceProviderRating
-        fields = (
-            'rating',
         )
 
 
