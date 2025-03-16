@@ -257,7 +257,7 @@ class ProductViewSet(BaseViewSet,
                               201: ProductSerializer()
                           }
                       ))
-    @action(methods=['POST'], detail=True, url_path='rate-product', permission_classes=[IsClientUser])
+    @action(methods=['POST'], detail=True, url_path='rate-product', permission_classes=[IsClientUser], parser_classes=(JSONParser, ))
     def rate_product(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

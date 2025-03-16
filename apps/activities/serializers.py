@@ -2,6 +2,7 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from apps.activities.models import EventCategory, Event, Course, CourseCategory, CoursePriceList
+from apps.reviews.models import ObjectRating
 
 
 class EventCategorySerializer(serializers.ModelSerializer):
@@ -27,12 +28,16 @@ class EventCategoryCreateSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name')
+    rating_from_user = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = (
             'id',
             'title',
+            'avg_rating',
+            'rating_from_user',
+            'rating_count',
             'category_id',
             'category_name',
             'image',
@@ -48,6 +53,18 @@ class EventSerializer(serializers.ModelSerializer):
             'from_age',
             'to_age'
         )
+
+    @property
+    def current_user(self):
+        user = self.context.get('user', None)
+        return user
+
+    def get_rating_from_user(self, obj):
+        if self.current_user:
+            event_rating = ObjectRating.objects.filter(user=self.current_user,
+                                                       event=obj).first()
+            return event_rating.rating if event_rating else None
+        return None
 
 
 class EventCreateSerializer(serializers.ModelSerializer):

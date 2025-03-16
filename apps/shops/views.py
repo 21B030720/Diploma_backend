@@ -322,7 +322,7 @@ class ShopViewSet(BaseViewSet,
                               201: ShopSerializer()
                           }
                       ))
-    @action(methods=['POST'], detail=True, url_path='rate-shop', permission_classes=[IsClientUser])
+    @action(methods=['POST'], detail=True, url_path='rate-shop', permission_classes=[IsClientUser], parser_classes=(JSONParser, ))
     def rate_shop(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
