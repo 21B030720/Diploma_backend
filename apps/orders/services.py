@@ -125,6 +125,8 @@ def update_order_status(order):
         order.status = OrderStatus.TOTALLY_GIVEN
     elif statuses == {OrderItemStatus.GIVEN_TO_CUSTOMER, OrderItemStatus.CANCELLED}:
         order.status = OrderStatus.PARTIALLY_GIVEN
+    elif statuses == {OrderItemStatus.CANCELLED}:
+        order.status = OrderStatus.CANCELLED
     else:
         order.status = OrderStatus.WAITING
 
