@@ -279,9 +279,12 @@ class ProductViewSet(BaseViewSet,
         obj = self.get_object()
         reviews = obj.ratings.filter(
             review__isnull=False
-        ).exclude(
-            user=self.request.user
-        ).order_by('-changed_at')
+        )
+        if self.request.user.is_authenticated:
+            reviews = reviews.exclude(
+                user=self.request.user
+            )
+        reviews = reviews.order_by('-changed_at')
         serializer = ObjectRatingSerializer(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

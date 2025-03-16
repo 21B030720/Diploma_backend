@@ -142,12 +142,16 @@ class CoursePriceListSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name')
     course_prices = CoursePriceListSerializer(many=True)
+    rating_from_user = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = (
             'id',
             'title',
+            'avg_rating',
+            'rating_from_user',
+            'rating_count',
             'category_id',
             'category_name',
             'image',
@@ -161,6 +165,18 @@ class CourseSerializer(serializers.ModelSerializer):
             'to_age',
             'course_prices'
         )
+
+    @property
+    def current_user(self):
+        user = self.context.get('user', None)
+        return user
+
+    def get_rating_from_user(self, obj):
+        if self.current_user:
+            event_rating = ObjectRating.objects.filter(user=self.current_user,
+                                                       course=obj).first()
+            return event_rating.rating if event_rating else None
+        return None
 
 
 class CourseCreateSerializer(serializers.ModelSerializer):

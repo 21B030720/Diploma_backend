@@ -137,3 +137,15 @@ def rate_event(event, user, data):
                                     **data)
 
     return event
+
+
+def rate_course(course, user, data):
+    is_already_rated = ObjectRating.objects.filter(user=user, course=course).exists()
+    if is_already_rated:
+        ObjectRating.objects.filter(user=user, course=course).update(**data)
+    else:
+        ObjectRating.objects.create(course=course,
+                                    user=user,
+                                    **data)
+
+    return course

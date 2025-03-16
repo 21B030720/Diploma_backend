@@ -15,7 +15,7 @@ from apps.activities.serializers import EventCategorySerializer, EventCategoryCr
     CourseCreateSerializer
 from apps.activities.services import delete_event_category, add_event_category, update_event_category, add_event, \
     update_event, delete_event, add_course_category, update_course_category, delete_course_category, add_course, \
-    update_course, delete_course, rate_event
+    update_course, delete_course, rate_event, rate_course
 from apps.reviews.serializers import ObjectRatingSerializer, RateSerializer
 from apps.users.permissions import IsAdmin, ReadOnly, IsClientUser
 from apps.utils.filters import SortingFilterBackend
@@ -244,9 +244,12 @@ class EventViewSet(BaseViewSet,
         obj = self.get_object()
         reviews = obj.ratings.filter(
             review__isnull=False
-        ).exclude(
-            user=self.request.user
-        ).order_by('-changed_at')
+        )
+        if self.request.user.is_authenticated:
+            reviews = reviews.exclude(
+                user=self.request.user
+            )
+        reviews = reviews.order_by('-changed_at')
         serializer = ObjectRatingSerializer(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -377,7 +380,8 @@ class CourseViewSet(BaseViewSet,
     serializer_class = CourseSerializer
     serializers = {
         'create': CourseCreateSerializer,
-        'update': CourseCreateSerializer
+        'update': CourseCreateSerializer,
+        'rate_course': RateSerializer
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = CourseFilterSet
@@ -385,6 +389,13 @@ class CourseViewSet(BaseViewSet,
     }
     parser_classes = (DrfNestedParser, JSONParser)
     permission_classes = [IsAdmin | ReadOnly]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        user = self.request.user
+        if user.is_authenticated:
+            context['user'] = user
+        return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -446,3 +457,56 @@ class CourseViewSet(BaseViewSet,
         items = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(items, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='rate_course',
+                      decorator=swagger_auto_schema(
+                          tags=['courses'],
+                          responses={
+                              201: CourseSerializer()
+                          }
+                      ))
+    @action(methods=['POST'], detail=True, url_path='rate-course', permission_classes=[IsClientUser],
+            parser_classes=(JSONParser,))
+    def rate_course(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = self.get_object()
+        user = self.request.user
+        service_provider = rate_course(obj, user, serializer.validated_data)
+        serializer = CourseSerializer(service_provider, context=self.get_serializer_context())
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @method_decorator(name='course_reviews',
+                      decorator=swagger_auto_schema(
+                          tags=['courses'],
+                          responses={
+                              200: ObjectRatingSerializer(many=True)
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='event-reviews')
+    def course_reviews(self, request, *args, **kwargs):
+        obj = self.get_object()
+        reviews = obj.ratings.filter(
+            review__isnull=False
+        )
+        if self.request.user.is_authenticated:
+            reviews = reviews.exclude(
+                user=self.request.user
+            )
+        reviews = reviews.order_by('-changed_at')
+        serializer = ObjectRatingSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='my_review',
+                      decorator=swagger_auto_schema(
+                          tags=['courses'],
+                          responses={
+                              200: ObjectRatingSerializer()
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='my-review', permission_classes=[IsClientUser])
+    def my_review(self, request, *args, **kwargs):
+        obj = self.get_object()
+        review = obj.ratings.filter(user=self.request.user).first()
+        serializer = ObjectRatingSerializer(review)
+        return Response(serializer.data, status=status.HTTP_200_OK)
