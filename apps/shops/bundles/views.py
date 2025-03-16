@@ -8,12 +8,13 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.reviews.serializers import ObjectRatingSerializer, RateSerializer
 from apps.shops.bundles.filters import BundleFilterSet
 from apps.shops.bundles.models import Bundle
 from apps.shops.bundles.serializers import BundleSerializer, BundleCreateSerializer
-from apps.shops.bundles.services import add_bundle, update_bundle, delete_bundle
+from apps.shops.bundles.services import add_bundle, update_bundle, delete_bundle, rate_bundle
 from apps.shops.products.serializers import ProductSerializer
-from apps.users.permissions import IsAdmin, IsManager, ReadOnly
+from apps.users.permissions import IsAdmin, IsManager, ReadOnly, IsClientUser
 from apps.utils.enums import RoleType
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.swagger_params import shop_id_param, sort_param
@@ -50,11 +51,19 @@ class BundleViewSet(BaseViewSet,
     serializers = {
         'create': BundleCreateSerializer,
         'update': BundleCreateSerializer,
-        'products': ProductSerializer
+        'products': ProductSerializer,
+        'rate_bundle': RateSerializer,
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
     filterset_class = BundleFilterSet
     permission_classes = [IsAdmin | IsManager | ReadOnly]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        user = self.request.user
+        if user.is_authenticated:
+            context['user'] = user
+        return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -123,7 +132,7 @@ class BundleViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(
                           tags=['bundles'],
                           responses={
-                              200: ProductSerializer(many=True),
+                              200: BundleSerializer(many=True),
                           }
                       ))
     @action(methods=['GET'], detail=True, url_path='products')
@@ -131,4 +140,53 @@ class BundleViewSet(BaseViewSet,
         instance = self.get_object()
         products = instance.products.all()
         serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='rate_bundle',
+                      decorator=swagger_auto_schema(
+                          tags=['bundles'],
+                          responses={
+                              201: BundleSerializer()
+                          }
+                      ))
+    @action(methods=['POST'], detail=True, url_path='rate-bundle', permission_classes=[IsClientUser])
+    def rate_bundle(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = self.get_object()
+        user = self.request.user
+        service_provider = rate_bundle(obj, user, serializer.validated_data)
+        serializer = BundleSerializer(service_provider, context=self.get_serializer_context())
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @method_decorator(name='bundle_reviews',
+                      decorator=swagger_auto_schema(
+                          tags=['bundles'],
+                          responses={
+                              200: ObjectRatingSerializer(many=True)
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='bundle-reviews')
+    def bundle_reviews(self, request, *args, **kwargs):
+        obj = self.get_object()
+        reviews = obj.ratings.filter(
+            review__isnull=False
+        ).exclude(
+            user=self.request.user
+        ).order_by('-changed_at')
+        serializer = ObjectRatingSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @method_decorator(name='my_review',
+                      decorator=swagger_auto_schema(
+                          tags=['bundles'],
+                          responses={
+                              200: ObjectRatingSerializer()
+                          }
+                      ))
+    @action(methods=['GET'], detail=True, url_path='my-review', permission_classes=[IsClientUser])
+    def my_review(self, request, *args, **kwargs):
+        obj = self.get_object()
+        review = obj.ratings.filter(user=self.request.user).first()
+        serializer = ObjectRatingSerializer(review)
         return Response(serializer.data, status=status.HTTP_200_OK)
