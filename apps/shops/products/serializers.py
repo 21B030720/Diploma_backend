@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.reviews.models import ObjectRating
 from apps.shops.commodity_groups.models import CommodityGroup
 from apps.shops.models import Shop
 from apps.shops.products.models import ProductCategory, Product, ProductNutritionCharacteristics
@@ -75,6 +76,7 @@ class ProductSerializer(serializers.ModelSerializer):
     shop_name = serializers.CharField(source='shop.name')
     category_name = serializers.CharField(source='category.name')
     nutrition_characteristics = NutritionCharacteristicsSerializer()
+    rating_from_user = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -82,8 +84,10 @@ class ProductSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'image',
+            'avg_rating',
+            'rating_from_user',
+            'rating_count',
             'description',
-            'rating',
             'category_id',
             'category_name',
             'nutrition_characteristics',
@@ -95,6 +99,18 @@ class ProductSerializer(serializers.ModelSerializer):
             'shop_name',
             'commodity_group'
         )
+
+    @property
+    def current_user(self):
+        user = self.context.get('user', None)
+        return user
+
+    def get_rating_from_user(self, obj):
+        if self.current_user:
+            product_rating = ObjectRating.objects.filter(user=self.current_user,
+                                                         product=obj).first()
+            return product_rating.rating if product_rating else None
+        return None
 
 
 class ProductSimpleSerializer(serializers.ModelSerializer):
