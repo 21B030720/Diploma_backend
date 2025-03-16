@@ -6,6 +6,7 @@ from apps.shops.bundles.models import Bundle
 from apps.shops.models import Shop
 from apps.shops.products.models import Product
 from apps.users.models import User
+from apps.utils.enums import ObjectRatingStatus
 from apps.utils.models import DeletedMixin, TimestampMixin
 
 
@@ -20,3 +21,4 @@ class ObjectRating(DeletedMixin, TimestampMixin):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='ratings', null=True, blank=True)
     rating = models.PositiveSmallIntegerField()
     review = models.CharField(max_length=255, null=True)
+    status = models.CharField(choices=ObjectRatingStatus.choices, default=ObjectRatingStatus.ON_MODERATION)

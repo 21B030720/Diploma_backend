@@ -47,6 +47,7 @@ urlpatterns = [
     path('paybox/', include('apps.paybox.urls')),
     path('emails/', include('apps.send_pulse.urls')),
     path('open-ai/', include('apps.deep_seek.urls')),
+    path('reviews/', include('apps.reviews.urls')),
 ]
 
 swagger_patterns = [
