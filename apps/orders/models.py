@@ -6,6 +6,7 @@ from django.db.models import Q, Sum
 from apps.shops.bundles.models import Bundle
 from apps.shops.models import Shop
 from apps.shops.products.models import Product
+from apps.users.kids.models import Kid
 from apps.users.models import ClientUser
 from apps.utils.enums import ItemType, OrderStatus, OrderItemStatus
 from apps.utils.models import DeletedMixin, TimestampMixin
@@ -40,5 +41,7 @@ class OrderItem(DeletedMixin, TimestampMixin):
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     overall_price = models.DecimalField(max_digits=10, decimal_places=2)
     final_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1)
     status = models.CharField(choices=OrderItemStatus.choices, default=OrderItemStatus.WAITING_FOR_COURIER)
     item_type = models.CharField(choices=ItemType.choices)
+    for_kid = models.ForeignKey(Kid, on_delete=models.CASCADE, related_name='order_items', null=True)

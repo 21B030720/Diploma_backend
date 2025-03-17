@@ -1,10 +1,11 @@
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin, UserManager
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 
 from apps import shops
+from apps.users.managers import UserManager
 from apps.utils.enums import RoleType
 from apps.utils.models import DeletedMixin, TimestampMixin
 

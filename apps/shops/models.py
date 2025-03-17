@@ -28,7 +28,6 @@ class Shop(DeletedMixin, TimestampMixin):
     open_from = models.TimeField(null=True)
     open_until = models.TimeField(null=True)
     image = models.ImageField(upload_to=upload_shop_image, null=True, blank=True)
-    rating = models.FloatField(null=True, default=0)
     latitude = models.FloatField(null=True)
     longitude = models.FloatField(null=True)
     two_gis_link = models.CharField(max_length=255, null=True)
