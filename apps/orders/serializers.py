@@ -30,6 +30,7 @@ class OrderItemSerializer(serializers.ModelSerializer): # for crm
             'discount',
             'final_price',
             'quantity',
+            'created_at',
             'status'
         )
 
@@ -77,7 +78,8 @@ class OrderItemForOrderSerializer(serializers.ModelSerializer): # for users
             'status',
             'shop_id',
             'shop_name',
-            'item_type'
+            'item_type',
+            'created_at'
         )
 
     @swagger_serializer_method(serializer_or_field=ProductSerializer())
@@ -135,6 +137,7 @@ class ClientOrderSerializer(serializers.ModelSerializer):
             'discount',
             'overall_price',
             'final_price',
+            'created_at',
             'status'
         )
 
