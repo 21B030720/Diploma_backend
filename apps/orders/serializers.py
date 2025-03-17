@@ -13,7 +13,7 @@ class OrderItemSerializer(serializers.ModelSerializer): # for crm
     client_name = serializers.CharField(source='client_order.client_user.name')
     client_phone_number = serializers.CharField(source='client_order.client_user.phone_number')
     shop_name = serializers.CharField(source='shop.name')
-    for_kid_name = serializers.CharField(source='for_kid.name')
+    for_kid_name = serializers.CharField(source='for_kid.name', allow_null=True)
 
     class Meta:
         model = OrderItem
@@ -59,7 +59,7 @@ class OrderItemForOrderSerializer(serializers.ModelSerializer): # for users
     product = serializers.SerializerMethodField()
     bundle = serializers.SerializerMethodField()
     shop_name = serializers.CharField(source='shop.name')
-    for_kid_name = serializers.CharField(source='for_kid.name')
+    for_kid_name = serializers.CharField(source='for_kid.name', allow_null=True)
 
     class Meta:
         model = OrderItem
