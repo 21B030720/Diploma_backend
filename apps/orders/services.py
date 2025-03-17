@@ -8,12 +8,14 @@ from rest_framework.generics import get_object_or_404
 from apps.orders.models import OrderItem, ClientOrder
 from apps.shops.bundles.models import Bundle
 from apps.shops.products.models import Product
+from apps.users.kids.services import reupdate_kid
 from apps.utils.enums import ItemType, OrderItemStatus, OrderStatus
 from apps.wallets.services import wallet_withdrawal
 
 
 @transaction.atomic
 def create_order(user, data):
+    kids_included = []
     client_user = user.client_user
     order_items = data.pop('order_items', [])
     overall_price = 0
@@ -33,18 +35,19 @@ def create_order(user, data):
         order_item_final_price = 0
         order_item_discount = order_item.get('discount', 0)
         item_type = order_item.get('item_type')
+        order_item_quantity = order_item.get('quantity')
         if item_type == ItemType.PRODUCT:
             product_id = order_item.get('product_id')
             product = Product.objects.get(id=product_id)
             product_price = product.price
-            order_item_overall_price += product_price
+            order_item_overall_price += product_price * order_item_quantity
             order_item_final_price += order_item_overall_price * (100 - order_item_discount) / 100
             shop = product.shop
         elif item_type == ItemType.BUNDLE:
             bundle_id = order_item.get('bundle_id')
             bundle = Bundle.objects.get(id=bundle_id)
             bundle_price = bundle.price
-            order_item_overall_price += bundle_price
+            order_item_overall_price += bundle_price * order_item_quantity
             order_item_final_price += order_item_overall_price * (100 - order_item_discount) / 100
             shop = bundle.shop
 
@@ -58,6 +61,8 @@ def create_order(user, data):
             final_price=order_item_final_price,
             **order_item
         )
+        if order_item.get('for_kid_id'):
+            kids_included.append(order_item.get('for_kid_id'))
         order_items_bulk.append(order_item_obj)
 
     final_price = overall_price * (100 - discount) / 100
@@ -66,6 +71,8 @@ def create_order(user, data):
     client_order.final_price = final_price
     client_order.save(update_fields=['overall_price', 'final_price'])
     OrderItem.objects.bulk_create(order_items_bulk)
+    for kid_id in kids_included:
+        reupdate_kid(client_user, kid_id)
     return client_order
 
 

@@ -15,6 +15,7 @@ class BundleCreateSerializer(serializers.ModelSerializer):
         model = Bundle
         fields = (
             'name',
+            'description',
             'products',
             'shop_id',
             'discount'
@@ -30,6 +31,7 @@ class BundleSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
+            'description',
             'avg_rating',
             'rating_from_user',
             'rating_count',

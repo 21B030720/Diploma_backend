@@ -48,6 +48,7 @@ urlpatterns = [
     path('emails/', include('apps.send_pulse.urls')),
     path('open-ai/', include('apps.deep_seek.urls')),
     path('reviews/', include('apps.reviews.urls')),
+    path('kids/', include('apps.users.kids.urls'))
 ]
 
 swagger_patterns = [

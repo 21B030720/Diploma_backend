@@ -3,16 +3,17 @@ from rest_framework import serializers
 
 from apps.orders.models import ClientOrder, OrderItem
 from apps.shops.bundles.models import Bundle
-from apps.shops.bundles.serializers import BundleSerializer, BundleDetailSerializer
+from apps.shops.bundles.serializers import BundleDetailSerializer
 from apps.shops.products.models import Product
 from apps.shops.products.serializers import ProductSerializer
-from apps.users.serializers import ClientUserSerializer
+from apps.users.kids.models import Kid
 
 
-class OrderItemSerializer(serializers.ModelSerializer):
+class OrderItemSerializer(serializers.ModelSerializer): # for crm
     client_name = serializers.CharField(source='client_order.client_user.name')
     client_phone_number = serializers.CharField(source='client_order.client_user.phone_number')
     shop_name = serializers.CharField(source='shop.name')
+    for_kid_name = serializers.CharField(source='for_kid.name')
 
     class Meta:
         model = OrderItem
@@ -21,11 +22,14 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'code',
             'client_name',
             'client_phone_number',
+            'for_kid_id',
+            'for_kid_name',
             'shop_id',
             'shop_name',
             'item_type',
             'discount',
             'final_price',
+            'quantity',
             'status'
         )
 
@@ -51,21 +55,25 @@ class ChangeOrderItemStatusSerializer(serializers.ModelSerializer):
         )
 
 
-class OrderItemForOrderSerializer(serializers.ModelSerializer):
+class OrderItemForOrderSerializer(serializers.ModelSerializer): # for users
     product = serializers.SerializerMethodField()
     bundle = serializers.SerializerMethodField()
     shop_name = serializers.CharField(source='shop.name')
+    for_kid_name = serializers.CharField(source='for_kid.name')
 
     class Meta:
         model = OrderItem
         fields = (
             'id',
             'code',
+            'for_kid_id',
+            'for_kid_name',
             'product',
             'bundle',
             'discount',
             'overall_price',
             'final_price',
+            'quantity',
             'status',
             'shop_id',
             'shop_name',
@@ -94,6 +102,9 @@ class OrderItemCreateSerializer(serializers.ModelSerializer):
     bundle_id = serializers.PrimaryKeyRelatedField(
         queryset=Bundle.objects.values_list('id', flat=True), allow_null=True
     )
+    for_kid_id = serializers.PrimaryKeyRelatedField(
+        queryset=Kid.objects.values_list('id', flat=True), required=False, allow_null=True
+    )
 
     class Meta:
         model = OrderItem
@@ -101,7 +112,9 @@ class OrderItemCreateSerializer(serializers.ModelSerializer):
             'id',
             'product_id',
             'bundle_id',
+            'for_kid_id',
             'discount',
+            'quantity',
             'item_type'
         )
 
@@ -126,7 +139,7 @@ class ClientOrderSerializer(serializers.ModelSerializer):
         )
 
 
-class ClientOrderDetailSerializer(ClientOrderSerializer):
+class ClientOrderDetailSerializer(ClientOrderSerializer): #For users
     order_items = OrderItemForOrderSerializer(many=True, read_only=True)
 
     class Meta:

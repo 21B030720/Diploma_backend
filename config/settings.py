@@ -72,6 +72,7 @@ CUSTOM_APPS = [
     'apps.deep_seek.apps.DeepSeekConfig',
     'apps.orders.apps.OrdersConfig',
     'apps.reviews.apps.ReviewsConfig',
+    'apps.users.kids.apps.KidsConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS
