@@ -71,7 +71,6 @@ class ShopSerializer(serializers.ModelSerializer):
             'blocked',
             'open_from',
             'open_until',
-            'rating',
             'latitude',
             'longitude',
             'contacts',
