@@ -101,9 +101,9 @@ class ClientOrderViewSet(BaseViewSet,
     def change_status(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        status = serializer.validated_data.get('status')
+        status_ = serializer.validated_data.get('status')
         obj = self.get_object()
-        order_item = change_order_status(obj, status)
+        order_item = change_order_status(obj, status_)
         serializer = ClientOrderSerializer(order_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
