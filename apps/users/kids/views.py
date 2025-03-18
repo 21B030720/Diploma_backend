@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -10,6 +11,7 @@ from apps.users.kids.serializers import KidSerializer, KidCreateSerializer
 from apps.users.kids.services import add_kid, update_kid, delete_kid
 from apps.users.permissions import IsClientUser
 from apps.utils.views import BaseViewSet
+from config.parsers import DrfNestedParser
 
 
 # Create your views here.
@@ -34,6 +36,7 @@ class KidViewSet(BaseViewSet,
         'create': KidCreateSerializer,
         'update': KidCreateSerializer
     }
+    parser_classes = (DrfNestedParser, JSONParser)
 
     permission_classes = [IsClientUser]
 
