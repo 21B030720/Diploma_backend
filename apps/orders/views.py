@@ -9,6 +9,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.orders.filters import ClientOrderFilterSet, OrderItemFilterSet
 from apps.orders.models import ClientOrder, OrderItem
 from apps.orders.serializers import ClientOrderSerializer, ClientOrderCreateSerializer, ClientOrderDetailSerializer, \
     OrderItemSerializer, OrderItemDetailSerializer, ChangeOrderItemStatusSerializer, ChangeOrderStatusSerializer
@@ -51,6 +52,7 @@ class ClientOrderViewSet(BaseViewSet,
         'change_status': ChangeOrderStatusSerializer
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = ClientOrderFilterSet
     sorting_fields = {
 
     }
@@ -112,8 +114,8 @@ class ClientOrderViewSet(BaseViewSet,
                   decorator=swagger_auto_schema(
                       tags=['order-items'],
                       manual_parameters=[
-                          sort_param,
-                          shop_id_param
+                          shop_id_param,
+                          sort_param
                       ]
                   ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['order-items']))
@@ -122,7 +124,10 @@ class OrderItemViewSet(BaseViewSet,
                        mixins.RetrieveModelMixin,
                        GenericViewSet):
     queryset = OrderItem.objects.select_related(
-        'client_order'
+        'client_order',
+        'shop',
+        'product',
+        'bundle'
     ).order_by('-created_at')
     serializer_class = OrderItemSerializer
     serializers = {
@@ -130,6 +135,7 @@ class OrderItemViewSet(BaseViewSet,
         'change_status': ChangeOrderItemStatusSerializer
     }
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = OrderItemFilterSet
     sorting_fields = {
         'client_name': 'client_order__client_user__name',
         'client_phone_number': 'client_order__client_user__phone_number',
@@ -150,6 +156,7 @@ class OrderItemViewSet(BaseViewSet,
                 queryset = queryset.filter(shop_id=shop_id)
         else:
             queryset = queryset.filter(client_order__client_user_id=self.request.user.client_user.id)
+
         shop_ids = self.request.query_params.getlist('shop_id', [])
         if shop_ids:
             queryset = queryset.filter(shop_id__in=shop_ids)

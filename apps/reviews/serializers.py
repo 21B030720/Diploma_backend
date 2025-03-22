@@ -17,12 +17,14 @@ class RateSerializer(serializers.ModelSerializer):
 
 
 class ObjectRatingSerializer(serializers.ModelSerializer):
+    client_id = serializers.IntegerField(source='user.client_user.id')
     client_name = serializers.CharField(source='user.client_user.name')
 
     class Meta:
         model = ObjectRating
         fields = (
             'id',
+            'client_id',
             'client_name',
             'rating',
             'review',

@@ -16,23 +16,14 @@ class EventCategoryFilterSet(filters.FilterSet):
 
 class EventFilterSet(filters.FilterSet):
     title = filters.CharFilter(field_name='title', lookup_expr='icontains')
-    from_price = filters.NumberFilter(method='filter_by_price_range')
-    to_price = filters.NumberFilter(method='filter_by_price_range')
+    category_id = filters.NumberFilter(field_name='category_id', lookup_expr='exact')
+    from_price = filters.NumberFilter(field_name='price', lookup_expr='gte')
+    to_price = filters.NumberFilter(field_name='price', lookup_expr='lte')
 
     class Meta:
         model = Event
         fields = {
-            'category_id': ['exact']
         }
-
-    def filter_by_price_range(self, queryset, name, value):
-        if name == 'from_price':
-            queryset = queryset.filter(price__gte=value)
-
-        if name == 'to_price':
-            queryset = queryset.filter(price__lte=value)
-
-        return queryset
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
@@ -77,11 +68,11 @@ class CourseCategoryFilterSet(filters.FilterSet):
 
 class CourseFilterSet(filters.FilterSet):
     title = filters.CharFilter(field_name='title', lookup_expr='icontains')
+    category_id = filters.NumberFilter(field_name='category_id', lookup_expr='exact')
 
     class Meta:
         model = Course
         fields = {
-
         }
 
     def filter_queryset(self, queryset):

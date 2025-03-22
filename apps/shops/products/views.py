@@ -90,7 +90,7 @@ class ProductCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['products-categories'],
                                                     request_body=ProductCategoryCreateSerializer,
                                                     responses={
-                                                        200: ProductCategorySerializer(),
+                                                        201: ProductCategorySerializer(),
                                                     }))
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -104,7 +104,7 @@ class ProductCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['products-categories'],
                                                     request_body=ProductCategoryCreateSerializer,
                                                     responses={
-                                                        200: ProductCategorySerializer(),
+                                                        201: ProductCategorySerializer(),
                                                     }))
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -300,7 +300,7 @@ class ProductViewSet(BaseViewSet,
     def my_review(self, request, *args, **kwargs):
         user = self.request.user
         if not user.is_authenticated:
-            raise ValidationError('You must be logged in to see your review.')
+            return Response({'details': 'You must be logged in to see your review.'}, status=status.HTTP_403_FORBIDDEN)
         obj = self.get_object()
         review = obj.ratings.filter(user=self.request.user).first()
         serializer = ObjectRatingSerializer(review)

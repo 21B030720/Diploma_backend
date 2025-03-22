@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.reviews.filters import ObjectRatingFilterSet
 from apps.reviews.models import ObjectRating
 from apps.reviews.serializers import ObjectRatingCRMSerializer
 from apps.reviews.services import delete_rating
@@ -14,7 +15,7 @@ from apps.users.permissions import IsAdmin
 from apps.utils.enums import ObjectRatingStatus
 from apps.utils.filters import SortingFilterBackend
 from apps.utils.serializers import EmptySerializer
-from apps.utils.swagger_params import sort_param
+from apps.utils.swagger_params import sort_param, shop_id_param
 from apps.utils.views import BaseViewSet
 
 
@@ -24,6 +25,7 @@ from apps.utils.views import BaseViewSet
     decorator=swagger_auto_schema(
         tags=['reviews'],
         manual_parameters=[
+            shop_id_param,
             sort_param
         ]
     )
@@ -44,11 +46,17 @@ class ObjectRatingViewSet(BaseViewSet,
     }
     permission_classes = [IsAdmin]
     filter_backends = (SortingFilterBackend, filters.DjangoFilterBackend)
+    filterset_class = ObjectRatingFilterSet
     sorting_fields = {
+        'client_name': 'user__client_user__name'
     }
 
     def get_queryset(self):
         queryset = super().get_queryset()
+
+        shop_ids = self.request.query_params.getlist('shop_id', [])
+        if shop_ids:
+            queryset = queryset.filter(shop__isnull=False, shop_id__in=shop_ids)
 
         return queryset
 

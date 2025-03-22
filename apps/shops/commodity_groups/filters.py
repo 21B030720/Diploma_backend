@@ -14,9 +14,9 @@ class CommodityGroupCategoryFilterSet(filters.FilterSet):
 
 class CommodityGroupFilterSet(filters.FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    category_id = filters.NumberFilter(field_name='category_id', lookup_expr='exact')
 
     class Meta:
         model = CommodityGroup
         fields = {
-            'category_id': ['exact']
         }

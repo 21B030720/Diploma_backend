@@ -15,23 +15,14 @@ class ProductCategoryFilterSet(filters.FilterSet):
 
 class ProductFilterSet(filters.FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains')
-    from_price = filters.NumberFilter(method='filter_by_price_range')
-    to_price = filters.NumberFilter(method='filter_by_price_range')
+    category_id = filters.NumberFilter(field_name='category_id', lookup_expr='exact')
+    from_price = filters.NumberFilter(field_name='price', lookup_expr='gte')
+    to_price = filters.NumberFilter(field_name='price', lookup_expr='lte')
 
     class Meta:
         model = Product
         fields = {
-            'category_id': ['exact'],
         }
-
-    def filter_by_price_range(self, queryset, name, value):
-        if name == 'from_price':
-            queryset = queryset.filter(price__gte=value)
-
-        if name == 'to_price':
-            queryset = queryset.filter(price__lte=value)
-
-        return queryset
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)

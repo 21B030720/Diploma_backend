@@ -4,6 +4,7 @@ from django_filters import rest_framework as filters
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -191,7 +192,7 @@ class BundleViewSet(BaseViewSet,
     def my_review(self, request, *args, **kwargs):
         user = self.request.user
         if not user.is_authenticated:
-            raise ValidationError('You must be logged in to see your review.')
+            return Response({'details': 'You must be logged in to see your review.'}, status=status.HTTP_403_FORBIDDEN)
         obj = self.get_object()
         review = obj.ratings.filter(user=self.request.user).first()
         serializer = ObjectRatingSerializer(review)
