@@ -16,19 +16,10 @@ class ServiceFilterSet(filters.FilterSet):
     title = filters.CharFilter(field_name='title', lookup_expr='icontains')
     service_type = filters.CharFilter(field_name='service_type', lookup_expr='exact')
     category_id = filters.NumberFilter(field_name='category_id', lookup_expr='exact')
-    from_price = filters.NumberFilter(method='filter_by_price_range')
-    to_price = filters.NumberFilter(method='filter_by_price_range')
+    from_price = filters.NumberFilter(field_name='price', lookup_expr='gte')
+    to_price = filters.NumberFilter(field_name='price', lookup_expr='lte')
 
     class Meta:
         model = Service
         fields = {
         }
-
-    def filter_by_price_range(self, queryset, name, value):
-        if name == 'from_price':
-            queryset = queryset.filter(price__gte=value)
-
-        if name == 'to_price':
-            queryset = queryset.filter(price__lte=value)
-
-        return queryset
