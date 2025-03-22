@@ -254,7 +254,7 @@ class ServiceViewSet(BaseViewSet,
     def my_review(self, request, *args, **kwargs):
         user = self.request.user
         if not user.is_authenticated:
-            raise ValidationError('You must be logged in to see your review.')
+            return Response({'details': 'You must be logged in to see your review.'}, status=status.HTTP_403_FORBIDDEN)
         obj = self.get_object()
         service_provider = obj.service_provider
         review = service_provider.ratings.filter(user=self.request.user).first()
