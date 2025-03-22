@@ -90,7 +90,7 @@ class ProductCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['products-categories'],
                                                     request_body=ProductCategoryCreateSerializer,
                                                     responses={
-                                                        200: ProductCategorySerializer(),
+                                                        201: ProductCategorySerializer(),
                                                     }))
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -104,7 +104,7 @@ class ProductCategoryViewSet(BaseViewSet,
                       decorator=swagger_auto_schema(tags=['products-categories'],
                                                     request_body=ProductCategoryCreateSerializer,
                                                     responses={
-                                                        200: ProductCategorySerializer(),
+                                                        201: ProductCategorySerializer(),
                                                     }))
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

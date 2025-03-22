@@ -107,8 +107,6 @@ class ServiceCategoryViewSet(BaseViewSet,
 @method_decorator(name='list',
                   decorator=swagger_auto_schema(
                       tags=['service'],
-
-
                   ))
 @method_decorator(name='retrieve', decorator=swagger_auto_schema(tags=['service']))
 @method_decorator(name='destroy', decorator=swagger_auto_schema(tags=['service']))

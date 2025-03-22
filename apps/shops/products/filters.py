@@ -15,13 +15,13 @@ class ProductCategoryFilterSet(filters.FilterSet):
 
 class ProductFilterSet(filters.FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains')
+    category_id = filters.NumberFilter(field_name='category_id', lookup_expr='exact')
     from_price = filters.NumberFilter(method='filter_by_price_range')
     to_price = filters.NumberFilter(method='filter_by_price_range')
 
     class Meta:
         model = Product
         fields = {
-            'category_id': ['exact'],
         }
 
     def filter_by_price_range(self, queryset, name, value):
