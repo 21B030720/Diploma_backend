@@ -97,7 +97,8 @@ class ProductSerializer(serializers.ModelSerializer):
             'measure',
             'shop_id',
             'shop_name',
-            'commodity_group'
+            'commodity_group',
+            'deleted'
         )
 
     @property
@@ -119,7 +120,8 @@ class ProductSimpleSerializer(serializers.ModelSerializer):
         model = Product
         fields = (
             'id',
-            'name'
+            'name',
+            'deleted'
         )
 
 

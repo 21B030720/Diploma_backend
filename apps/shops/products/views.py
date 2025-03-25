@@ -43,7 +43,9 @@ class ProductCategoryViewSet(BaseViewSet,
                              mixins.DestroyModelMixin,
                              GenericViewSet
                              ):
-    queryset = ProductCategory.objects.select_related(
+    queryset = ProductCategory.objects.filter(
+        shop__deleted=False
+    ).select_related(
         'shop'
     )
     serializer_class = ProductCategorySerializer
@@ -152,7 +154,9 @@ class ProductViewSet(BaseViewSet,
                      mixins.DestroyModelMixin,
                      GenericViewSet
                      ):
-    queryset = Product.objects.select_related(
+    queryset = Product.objects.filter(
+        shop__deleted=False
+    ).select_related(
         'shop'
     )
     serializer_class = ProductSerializer

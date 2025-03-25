@@ -42,7 +42,9 @@ class BundleViewSet(BaseViewSet,
                     mixins.DestroyModelMixin,
                     GenericViewSet
                     ):
-    queryset = Bundle.objects.select_related(
+    queryset = Bundle.objects.filter(
+        shop__deleted=False
+    ).select_related(
         'shop'
     ).prefetch_related(
         'products'

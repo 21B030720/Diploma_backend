@@ -42,7 +42,9 @@ class CommodityGroupCategoryViewSet(BaseViewSet,
                                     mixins.DestroyModelMixin,
                                     GenericViewSet
                                     ):
-    queryset = CommodityGroupCategory.objects.select_related(
+    queryset = CommodityGroupCategory.objects.filter(
+        shop__deleted=False
+    ).select_related(
         'shop'
     )
     serializer_class = CommodityGroupCategorySerializer
@@ -150,7 +152,9 @@ class CommodityGroupViewSet(BaseViewSet,
                             mixins.DestroyModelMixin,
                             GenericViewSet
                             ):
-    queryset = CommodityGroup.objects.select_related(
+    queryset = CommodityGroup.objects.filter(
+        shop__deleted=False
+    ).select_related(
         'shop'
     )
     serializer_class = CommodityGroupSerializer
