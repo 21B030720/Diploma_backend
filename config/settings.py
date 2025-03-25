@@ -13,7 +13,6 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from corsheaders.defaults import default_headers
 from django.utils.translation import gettext_lazy as _
 import environ
 
@@ -80,12 +79,8 @@ INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + CUSTOM_APPS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
-    "https://b773-147-30-12-31.ngrok-free.app"
-]
-
-CORS_ALLOW_HEADERS = [
-    *default_headers,
-    "ngrok-skip-browser-warning",
+    "https://kampitik-store.vercel.app",
+    "https://kampitik-crm.vercel.app"
 ]
 
 MIDDLEWARE = [
@@ -209,7 +204,8 @@ REST_FRAMEWORK = {
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
-    'https://b773-147-30-12-31.ngrok-free.app',
+    "https://kampitik-store.vercel.app",
+    "https://kampitik-crm.vercel.app"
 ]
 
 AUTH_USER_MODEL = 'users.User'
