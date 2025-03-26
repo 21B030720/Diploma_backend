@@ -98,6 +98,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'to_age',
             'size',
             'price',
+            'weight',
             'measure',
             'shop_id',
             'shop_name',
@@ -148,6 +149,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'to_age',
             'size',
             'price',
+            'weight',
             'measure',
             'shop_id',
             'commodity_group_id'

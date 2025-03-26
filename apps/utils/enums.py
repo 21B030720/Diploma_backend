@@ -38,6 +38,7 @@ TimeZones = [
 
 
 class Measures(TextChoices):
+    WEIGHT_G = 'GR', 'GR'
     WEIGHT = 'KG', 'KG'
     LITER = 'L', 'L'
     PIECE = 'PC', 'PC'

@@ -44,6 +44,7 @@ class Product(DeletedMixin, TimestampMixin):
     to_age = models.PositiveIntegerField(null=True, blank=True)
     size = models.CharField(max_length=255, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     measure = models.CharField(choices=Measures.choices, max_length=100)
     shop = models.ForeignKey(Shop, related_name='products', on_delete=models.CASCADE)
     commodity_group = models.ForeignKey(CommodityGroup, on_delete=models.SET_NULL, related_name='products', null=True, blank=True)
