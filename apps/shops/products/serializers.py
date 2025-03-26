@@ -80,6 +80,7 @@ class ProductSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name')
     nutrition_characteristics = NutritionCharacteristicsSerializer()
     rating_from_user = serializers.SerializerMethodField()
+    commodity_group_name = serializers.CharField(source='commodity_group.name', allow_null=True)
 
     class Meta:
         model = Product
@@ -103,6 +104,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'shop_id',
             'shop_name',
             'commodity_group',
+            'commodity_group_name',
             'deleted'
         )
 
@@ -132,10 +134,11 @@ class ProductSimpleSerializer(serializers.ModelSerializer):
 
 class ProductCreateSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False)
-    category_id = serializers.PrimaryKeyRelatedField(queryset=ProductCategory.objects.values_list('id', flat=True))
     nutrition_characteristics = NutritionCharacteristicsCreateSerializer(required=False, allow_null=True)
     shop_id = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.values_list('id', flat=True))
-    commodity_group_id = serializers.PrimaryKeyRelatedField(queryset=CommodityGroup.objects.values_list('id', flat=True), required=False, allow_null=True)
+    commodity_group_id = serializers.PrimaryKeyRelatedField(queryset=CommodityGroup.objects.values_list('id', flat=True),
+                                                            required=False,
+                                                            allow_null=True)
 
     class Meta:
         model = Product
@@ -143,7 +146,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'name',
             'image',
             'description',
-            'category_id',
+            'commodity_group_id',
             'nutrition_characteristics',
             'from_age',
             'to_age',
@@ -152,5 +155,4 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'weight',
             'measure',
             'shop_id',
-            'commodity_group_id'
         )

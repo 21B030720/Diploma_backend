@@ -35,7 +35,7 @@ class Product(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=255)
     image = models.ImageField(upload_to=upload_product_image, null=True, blank=True)
     description = models.TextField()
-    category = models.ForeignKey(ProductCategory, related_name='products', on_delete=models.CASCADE)
+    category = models.ForeignKey(ProductCategory, related_name='products', on_delete=models.CASCADE, null=True, blank=True)
     nutrition_characteristics = models.ForeignKey(ProductNutritionCharacteristics,
                                                   related_name='products',
                                                   on_delete=models.SET_NULL,

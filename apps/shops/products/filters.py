@@ -16,6 +16,8 @@ class ProductCategoryFilterSet(filters.FilterSet):
 class ProductFilterSet(filters.FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains')
     category_id = filters.NumberFilter(field_name='category_id', lookup_expr='exact')
+    commodity_group_category_id = filters.NumberFilter(field_name='commodity_group__category__id', lookup_expr='exact')
+    commodity_group_id = filters.NumberFilter(field_name='commodity_group_id', lookup_expr='exact')
     from_price = filters.NumberFilter(field_name='price', lookup_expr='gte')
     to_price = filters.NumberFilter(field_name='price', lookup_expr='lte')
 
