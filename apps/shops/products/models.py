@@ -21,6 +21,7 @@ class ProductCategory(DeletedMixin, TimestampMixin):
     name = models.CharField(max_length=100)
     icon = models.ImageField(upload_to=upload_product_category_icon, null=True, blank=True)
     shop = models.ForeignKey(Shop, related_name='categories', on_delete=models.CASCADE)
+    is_eatable = models.BooleanField(default=False, null=True, blank=True)
 
 
 class ProductNutritionCharacteristics(DeletedMixin, TimestampMixin):
@@ -40,7 +41,8 @@ class Product(DeletedMixin, TimestampMixin):
                                                   on_delete=models.SET_NULL,
                                                   null=True)
     from_age = models.PositiveIntegerField()
-    to_age = models.PositiveIntegerField()
+    to_age = models.PositiveIntegerField(null=True, blank=True)
+    size = models.CharField(max_length=255, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     measure = models.CharField(choices=Measures.choices, max_length=100)
     shop = models.ForeignKey(Shop, related_name='products', on_delete=models.CASCADE)
