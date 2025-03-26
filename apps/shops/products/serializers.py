@@ -77,7 +77,7 @@ class NutritionCharacteristicsCreateSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     shop_name = serializers.CharField(source='shop.name')
-    category_name = serializers.CharField(source='category.name')
+    category_name = serializers.CharField(source='category.name', allow_null=True)
     nutrition_characteristics = NutritionCharacteristicsSerializer()
     rating_from_user = serializers.SerializerMethodField()
     commodity_group_name = serializers.CharField(source='commodity_group.name', allow_null=True)
