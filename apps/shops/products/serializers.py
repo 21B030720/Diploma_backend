@@ -17,7 +17,8 @@ class ProductCategorySerializer(serializers.ModelSerializer):
             'name',
             'icon',
             'shop_id',
-            'shop_name'
+            'shop_name',
+            'is_eatable'
         )
 
     # def get_icon(self, obj):
@@ -31,7 +32,8 @@ class ProductCategorySimpleSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            'icon'
+            'icon',
+            'is_eatable'
         )
 
 
@@ -44,7 +46,8 @@ class ProductCategoryCreateSerializer(serializers.ModelSerializer):
         fields = (
             'name',
             'icon',
-            'shop_id'
+            'shop_id',
+            'is_eatable'
         )
 
 
@@ -93,7 +96,9 @@ class ProductSerializer(serializers.ModelSerializer):
             'nutrition_characteristics',
             'from_age',
             'to_age',
+            'size',
             'price',
+            'weight',
             'measure',
             'shop_id',
             'shop_name',
@@ -142,7 +147,9 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'nutrition_characteristics',
             'from_age',
             'to_age',
+            'size',
             'price',
+            'weight',
             'measure',
             'shop_id',
             'commodity_group_id'
