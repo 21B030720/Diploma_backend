@@ -17,7 +17,7 @@ class CRMUserFilterSet(filters.FilterSet):
 class ClientUserFilterSet(filters.FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='icontains')
     email = filters.CharFilter(field_name='email', lookup_expr='icontains')
-    phone = filters.CharFilter(field_name='phone', lookup_expr='icontains')
+    phone = filters.CharFilter(field_name='phone_number', lookup_expr='icontains')
 
     class Meta:
         models = ClientUser

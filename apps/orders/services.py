@@ -89,14 +89,11 @@ def change_order_item_status(order_item, status):
         wallet_withdrawal(client_user.wallet, -order_item.final_price)
         order.final_price -= order_item.final_price
         order.save(update_fields=['final_price'])
-        order_item.status = status
-        order_item.save(update_fields=['status'])
-    else:
-        order_item.status = status
-        order_item.save(update_fields=['status'])
 
-        update_order_status(order)
+    order_item.status = status
+    order_item.save(update_fields=['status'])
 
+    update_order_status(order)
     return order_item
 
 
@@ -111,7 +108,6 @@ def change_order_status(order: ClientOrder, status):
         for order_item in order_items:
             change_order_item_status(order_item, OrderItemStatus.CANCELLED)
     order.status = status
-
     order.save(update_fields=['status'])
     update_order_status(order)
     return order
@@ -125,7 +121,7 @@ def generate_unique_code_for_order_item(k=6):
 
 
 def update_order_status(order):
-    order_items = order.order_items.all()
+    order_items = OrderItem.objects.filter(client_order=order)
     statuses = {item.status for item in order_items}
 
     if statuses == {OrderItemStatus.GIVEN_TO_CUSTOMER}:
