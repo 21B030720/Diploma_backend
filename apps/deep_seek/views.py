@@ -27,6 +27,6 @@ class OpenAiAPIView(APIView):
         serializer = SendMessageSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         message = serializer.validated_data.get('message')
-        result = get_message_from_assistant(message, library_name)
+        result = get_message_from_assistant(message, library_name, self.request.user)
         serializer = SendMessageSerializer(result)
         return Response(serializer.data, status=status.HTTP_200_OK)

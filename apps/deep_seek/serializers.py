@@ -2,34 +2,25 @@ from rest_framework import serializers
 
 from apps.shops.commodity_groups.models import CommodityGroupCategory, CommodityGroup
 from apps.shops.models import Shop
-from apps.shops.products.models import Product, ProductCategory
+from apps.shops.products.models import Product
 from apps.shops.products.serializers import NutritionCharacteristicsSerializer
 
 
 class ProductHeavyInfoSerializer(serializers.ModelSerializer):
     nutrition_characteristics = NutritionCharacteristicsSerializer()
-    category_name = serializers.CharField(source='category.name')
+    commodity_group_name = serializers.CharField(source='commodity_group_name.name')
 
     class Meta:
         model = Product
         fields = (
             'name',
-            'category_name',
+            'commodity_group_name',
             'description',
             'from_age',
             'to_age',
             'price',
             'measure',
             'nutrition_characteristics'
-        )
-
-
-class ProductCategoryHeavyInfoSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ProductCategory
-        fields = (
-            'name',
         )
 
 
@@ -46,19 +37,18 @@ class CommodityGroupHeavyInfoSerializer(serializers.ModelSerializer):
 
 
 class CommodityGroupCategoryHeavyInfoSerializer(serializers.ModelSerializer):
-    commodity_groups_inside = CommodityGroupHeavyInfoSerializer(source='commodity_groups', many=True)
+    commodity_groups_inside_this_category = CommodityGroupHeavyInfoSerializer(source='commodity_groups', many=True)
 
     class Meta:
         model = CommodityGroupCategory
         fields = (
             'name',
-            'commodity_groups_inside'
+            'commodity_groups_inside_this_category'
         )
 
 
 class ShopsHeavyInfoSerializer(serializers.ModelSerializer):
     shop_name = serializers.CharField(source='name')
-    product_categories_available_in_this_shop = ProductCategoryHeavyInfoSerializer(source='categories', many=True)
     commodity_group_categories_available_in_this_shop = CommodityGroupCategoryHeavyInfoSerializer(
         source='commodity_group_categories',
         many=True
@@ -73,7 +63,6 @@ class ShopsHeavyInfoSerializer(serializers.ModelSerializer):
             'address',
             'located_country',
             'located_city',
-            'product_categories_available_in_this_shop',
             'commodity_group_categories_available_in_this_shop'
         )
 

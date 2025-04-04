@@ -3,33 +3,66 @@ import logging
 from django.core.cache import cache
 from openai import OpenAI, APIStatusError
 
+from apps.activities.models import Event, Course
+from apps.activities.serializers import EventSerializer, CourseSerializer
 from apps.deep_seek.serializers import ShopsHeavyInfoSerializer
+from apps.services.models import Service
+from apps.services.serializers import ServiceSerializer
 from apps.shops.models import Shop
+from apps.users.kids.models import Kid
+from apps.users.kids.serializers import KidSerializer
 from config import settings
 
 # for backward compatibility, you can still use `https://api.deepseek.com/v1` as `base_url`.
 
 
-def get_message_from_assistant(message, model_name='openai'):
+def get_message_from_assistant(message, model_name='openai', user=None):
     system_prompt = cache.get('system_prompt', None)
     if system_prompt is None:
         shops = Shop.objects.select_related(
             'city',
         ).prefetch_related(
-            'categories',
-            'categories__products',
             'commodity_group_categories',
             'commodity_group_categories__commodity_groups__products'
         )
-        shops_data = ShopsHeavyInfoSerializer(shops, many=True)
+        services = Service.objects.select_related(
+            'category',
+            'service_provider'
+        )
+        events = Event.objects.select_related(
+            'category'
+        )
+        courses = Course.objects.select_related(
+            'category'
+        )
+        children = []
+        if hasattr(user, 'client_user'):
+            children = Kid.objects.filter(client_user=user.client_user)
 
+        shops_data = ShopsHeavyInfoSerializer(shops, many=True)
+        services_data = ServiceSerializer(services, many=True)
+        events_data = EventSerializer(events, many=True)
+        courses_data = CourseSerializer(courses, many=True)
+        children = KidSerializer(children, many=True)
         system_prompt = f"""
         The user is a client of web site related to child support. And you are AI assistant called "Kampitik-Bot".
         About web site: Clients can find shops, products, activities (Courses, Events, Services(Baby sitters etc.))
         Your position here is to give advices and answer any question only related to child care.
     
-        additional info about shops we have:
+        If somebody asks you about what do we have, additional info about shops and their products is provided below:
         {shops_data.data}
+        
+        If somebody asks about services:
+        {services_data.data}
+        
+        If somebody asks you about activities, you tell them about events and courses. Events:
+        {events_data.data}
+        
+        Courses:
+        {courses_data.data}
+        
+        If the user have children, then here is information about them. Talk about them only and if only user asks what to buy for them:
+        {children}
         """
         cache.set('system_prompt', system_prompt)
     response = ""
