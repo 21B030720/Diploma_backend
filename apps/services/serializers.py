@@ -1,4 +1,3 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 
 from apps.reviews.models import ObjectRating
