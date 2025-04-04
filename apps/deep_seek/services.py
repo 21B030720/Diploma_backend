@@ -35,15 +35,11 @@ def get_message_from_assistant(message, model_name='openai', user=None):
         courses = Course.objects.select_related(
             'category'
         )
-        children = []
-        if hasattr(user, 'client_user'):
-            children = Kid.objects.filter(client_user=user.client_user)
 
         shops_data = ShopsHeavyInfoSerializer(shops, many=True)
         services_data = ServiceSerializer(services, many=True)
         events_data = EventSerializer(events, many=True)
         courses_data = CourseSerializer(courses, many=True)
-        children = KidSerializer(children, many=True)
         system_prompt = f"""
         The user is a client of web site related to child support. And you are AI assistant called "Kampitik-Bot".
         About web site: Clients can find shops, products, activities (Courses, Events, Services(Baby sitters etc.))
@@ -60,26 +56,31 @@ def get_message_from_assistant(message, model_name='openai', user=None):
         
         Courses:
         {courses_data.data}
-        
-        If the user have children, then here is information about them. Talk about them only and if only user asks what to buy for them:
-        {children}
         """
         cache.set('system_prompt', system_prompt)
     response = ""
     if model_name == 'openai':
-        response = get_response_from_openai(message)
+        response = get_response_from_openai(message, user)
     elif model_name == 'deep_seek':
-        response = get_response_from_deep_seek(message)
+        response = get_response_from_deep_seek(message, user)
     result = dict()
     result['message'] = response
     return result
 
 
-def get_response_from_openai(message):
+def get_response_from_openai(message, user):
     try:
+        children = []
+        if hasattr(user, 'client_user'):
+            client_user = user.client_user
+            children = Kid.objects.filter(client_user=client_user)
+        children_data = KidSerializer(children, many=True).data
         client = OpenAI(api_key=settings.OPEN_AI_API_KEY)
         prompt = cache.get('system_prompt')
-
+        prompt += f'''
+        If the user have children, then here is information about them. Talk about them only and if only user asks what to buy for them:
+        {children_data}
+        '''
         response = client.chat.completions.create(
             model='gpt-4o',
             messages=[
@@ -96,10 +97,20 @@ def get_response_from_openai(message):
         logging.warning(f"openai: {e}")
 
 
-def get_response_from_deep_seek(message):
+def get_response_from_deep_seek(message, user):
     try:
+        children = []
+        if hasattr(user, 'client_user'):
+            client_user = user.client_user
+            children = Kid.objects.filter(client_user=client_user)
+        children_data = KidSerializer(children, many=True).data
+
         client = OpenAI(api_key=settings.DEEP_SEEK_API_KEY, base_url=settings.DEEP_SEEK_BASE_URL)
         prompt = cache.get('system_prompt')
+        prompt += f'''
+                If the user have children, then here is information about them. Talk about them only and if only user asks what to buy for them:
+                {children_data}
+                '''
 
         response = client.chat.completions.create(
             model='gpt-4o',
