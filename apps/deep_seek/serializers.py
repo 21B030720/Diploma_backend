@@ -8,7 +8,7 @@ from apps.shops.products.serializers import NutritionCharacteristicsSerializer
 
 class ProductHeavyInfoSerializer(serializers.ModelSerializer):
     nutrition_characteristics = NutritionCharacteristicsSerializer()
-    commodity_group_name = serializers.CharField(source='commodity_group_name.name')
+    commodity_group_name = serializers.CharField(source='commodity_group.name')
 
     class Meta:
         model = Product
