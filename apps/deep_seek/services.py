@@ -77,10 +77,7 @@ def get_response_from_openai(message, user):
         children_data = KidSerializer(children, many=True).data
         client = OpenAI(api_key=settings.OPEN_AI_API_KEY)
         prompt = cache.get('system_prompt')
-        prompt += f'''
-        If the user have children, then here is information about them. Talk about them only and if only user asks what to buy for them:
-        {children_data}
-        '''
+        prompt += f"\n If the user have children, then here is information about them. Talk about them only and if only user asks what to buy for them:\n{children_data}"
         response = client.chat.completions.create(
             model='gpt-4o',
             messages=[
@@ -107,10 +104,7 @@ def get_response_from_deep_seek(message, user):
 
         client = OpenAI(api_key=settings.DEEP_SEEK_API_KEY, base_url=settings.DEEP_SEEK_BASE_URL)
         prompt = cache.get('system_prompt')
-        prompt += f'''
-                If the user have children, then here is information about them. Talk about them only and if only user asks what to buy for them:
-                {children_data}
-                '''
+        prompt += f"\n If the user have children, then here is information about them. Talk about them only and if only user asks what to buy for them:\n{children_data}"
 
         response = client.chat.completions.create(
             model='gpt-4o',
