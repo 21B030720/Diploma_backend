@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django_filters import rest_framework as filters
 from drf_yasg.utils import swagger_auto_schema
