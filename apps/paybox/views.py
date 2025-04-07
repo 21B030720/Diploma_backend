@@ -1,6 +1,5 @@
 import logging
 
-from django.shortcuts import render
 import xml.etree.ElementTree as ET
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
