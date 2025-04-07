@@ -42,8 +42,8 @@ class CardViewSet(BaseViewSet,
         return queryset
 
     def perform_destroy(self, instance):
-        instance.is_deleted = True
-        instance.save(update_fields=['is_deleted'])
+        instance.deleted = True
+        instance.save(update_fields=['deleted'])
         delete_user_card_task.apply_async(args=[self.request.user.id, instance.id])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
